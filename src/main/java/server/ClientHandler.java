@@ -26,20 +26,34 @@ public class ClientHandler implements  Runnable{
         printWriter.println(message);
     }
 
+    private void closeClient() throws IOException{
+        clientSocket.close();
+    }
+
     @Override
     public void run() {
         try {
             String request;
             username = bufferedReader.readLine();
-            server.broadcastMessage( username + " has joined the chat!");
+            server.broadcastMessage( "------------------------------" +
+                    "Server: " + username + " has joined the chat!" +
+                    "------------------------------", username);
             server.addClient(this);
 
             while ((request = bufferedReader.readLine()) != null){
-                server.broadcastMessage(username + ": " + request);
+                if (!request.equalsIgnoreCase("quit")) {
+                    server.broadcastMessage(username + ": " + request, username);
+                }
+                else{
+                    closeClient();
+                    server.broadcastMessage( "------------------------------" +
+                            "Server: " + username + " has left the chat!" +
+                            "------------------------------", username);
+                }
             }
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println( username + " has disconnected");
         }
     }
 }

@@ -16,10 +16,11 @@ public class ListenForMessages implements Runnable{
     @Override
     public void run() {
         try {
+            String response;
             bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            while (true) {
+            while ((response = bufferedReader.readLine()) != null) {
                 System.out.println();
-                System.out.println(bufferedReader.readLine());
+                System.out.println(response);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

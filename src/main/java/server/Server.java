@@ -11,9 +11,12 @@ public class Server {
         clients = new HashMap<>();
     }
 
-    public synchronized void broadcastMessage(String message){
+    public synchronized void broadcastMessage(String message, String username){
          for (ClientHandler client: clients.values()){
-                client.sendMessage(message);
+                if (!client.username().equals(username)) {
+                    message = String.format("%100s", message);
+                    client.sendMessage(message);
+                }else {client.sendMessage(message);}
          }
     }
 

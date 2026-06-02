@@ -27,6 +27,7 @@ public class Client {
             System.out.println(username + ": ");
             request = sc.nextLine();
             printWriter.println(request);
+            if (request.equalsIgnoreCase("quit")) { System.exit(0);}
         }
     }
 
