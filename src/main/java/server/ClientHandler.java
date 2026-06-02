@@ -35,20 +35,21 @@ public class ClientHandler implements  Runnable{
         try {
             String request;
             username = bufferedReader.readLine();
-            server.broadcastMessage( "------------------------------" +
-                    "Server: " + username + " has joined the chat!" +
-                    "------------------------------", username);
+            server.broadcastMessage( "\n\u001B[35m" + "------------------------------" + "\u001B[0m" +
+                    "\u001B[1m" + "Server: " + username + " has joined the chat!" + "\u001B[0m" +
+                    "\u001B[35m" + "------------------------------" + "\u001B[0m\n", username);
             server.addClient(this);
 
             while ((request = bufferedReader.readLine()) != null){
                 if (!request.equalsIgnoreCase("quit")) {
-                    server.broadcastMessage(username + ": " + request, username);
+                    String message = username + ": " + request;
+                    server.broadcastMessage(message, username);
                 }
                 else{
                     closeClient();
-                    server.broadcastMessage( "------------------------------" +
-                            "Server: " + username + " has left the chat!" +
-                            "------------------------------", username);
+                    server.broadcastMessage( "\n\u001B[35m" + "------------------------------" + "\u001B[0m" +
+                            "\u001B[1m" + "Server: " + username + " has left the chat!" + "\u001B[0m" +
+                            "\u001B[35m" + "------------------------------" + "\u001B[0m\n", username);
                 }
             }
 

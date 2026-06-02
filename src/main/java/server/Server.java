@@ -14,9 +14,9 @@ public class Server {
     public synchronized void broadcastMessage(String message, String username){
          for (ClientHandler client: clients.values()){
                 if (!client.username().equals(username)) {
-                    message = String.format("%100s", message);
-                    client.sendMessage(message);
-                }else {client.sendMessage(message);}
+                    String newMessage = String.format("%50s", message);
+                    client.sendMessage(newMessage);
+                }else { client.sendMessage(message); }
          }
     }
 

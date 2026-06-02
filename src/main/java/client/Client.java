@@ -12,21 +12,24 @@ public class Client {
     private static BufferedReader bufferedReader;
 
 
-    public static void main() throws IOException{
+    public static void main(String[] args) throws IOException{
         System.out.println("Please enter your username: ");
         username = sc.nextLine();
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
 
         clientSocket = new Socket("localhost",8081);
         printWriter = new PrintWriter(clientSocket.getOutputStream(), true);
-        new Thread(new ListenForMessages(clientSocket)).start();
+        bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        new Thread(new ListenForMessages(bufferedReader)).start();
 
         printWriter.println(username);
 
         String request;
         while (true){
-            System.out.println(username + ": ");
             request = sc.nextLine();
             printWriter.println(request);
+            System.out.print("\033[1A\033[2K");
             if (request.equalsIgnoreCase("quit")) { System.exit(0);}
         }
     }

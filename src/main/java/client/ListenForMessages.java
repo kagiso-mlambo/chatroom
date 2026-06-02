@@ -6,20 +6,19 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class ListenForMessages implements Runnable{
-    private Socket clientSocket;
-    private static  BufferedReader bufferedReader;
+    private BufferedReader bufferedReader;
 
-    public ListenForMessages(Socket clientSocket){
-        this.clientSocket = clientSocket;
+    public ListenForMessages(BufferedReader bufferedReader){
+        this.bufferedReader = bufferedReader;
     }
 
     @Override
     public void run() {
         try {
             String response;
-            bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
             while ((response = bufferedReader.readLine()) != null) {
-                System.out.println();
+                System.out.print("\r\033[K");
                 System.out.println(response);
             }
         } catch (IOException e) {
