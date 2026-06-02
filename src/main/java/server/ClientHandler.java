@@ -11,24 +11,33 @@ public class ClientHandler implements  Runnable{
     private Socket clientSocket;
     private PrintWriter printWriter;
     private BufferedReader bufferedReader;
+    private final Server server;
 
-    public ClientHandler(Socket clientSocket){
+    public ClientHandler(Server server, Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
+        this.server = server;
+        printWriter = new PrintWriter(clientSocket.getOutputStream(), true);
+        bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+    }
+
+    public String username(){ return username; }
+
+    public void sendMessage(String message){
+        printWriter.println(message);
     }
 
     @Override
     public void run() {
         try {
-            printWriter = new PrintWriter(clientSocket.getOutputStream(), true);
-            bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
             String request;
             username = bufferedReader.readLine();
-            System.out.println( username + " has joined the chat!");
+            server.broadcastMessage( username + " has joined the chat!");
+            server.addClient(this);
 
             while ((request = bufferedReader.readLine()) != null){
-                System.out.println(username + ": " + request);
+                server.broadcastMessage(username + ": " + request);
             }
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
