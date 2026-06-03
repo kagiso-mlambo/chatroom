@@ -8,9 +8,11 @@ import java.net.Socket;
 public class ListenForMessages implements Runnable{
     private BufferedReader bufferedReader;
 
+
     public ListenForMessages(BufferedReader bufferedReader){
         this.bufferedReader = bufferedReader;
     }
+
 
     @Override
     public void run() {
