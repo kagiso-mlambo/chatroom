@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 public class ClientHandler implements  Runnable{
     private String username;
@@ -38,8 +39,14 @@ public class ClientHandler implements  Runnable{
         server.broadcastMessage(exitNotificationMessage, username);
     }
 
-    private void commands(String command){
-
+    private void commands(String command) throws IOException{
+        switch (command){
+            case "/quit":
+                closeClient();
+            case "/users":
+                Map<String, ClientHandler> clients = server.clients();
+                for (String client: clients.keySet()){if (!this.username.equals(client)) sendMessage(client); }
+        }
     }
 
     @Override
@@ -67,8 +74,7 @@ public class ClientHandler implements  Runnable{
                     server.broadcastMessage(message, username);
                 }
                 else{
-                    closeClient();
-
+                    commands(request);
                 }
             }
 

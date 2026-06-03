@@ -2,7 +2,9 @@ package server;
 
 import java.net.*;
 import java.io.*;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Server {
     private static HashMap<String, ClientHandler> clients;
@@ -10,6 +12,10 @@ public class Server {
     public Server(){
         clients = new HashMap<>();
     }
+
+    public void addClient(ClientHandler client){ clients.put(client.username(), client); }
+
+    public Map<String, ClientHandler> clients() { return Collections.unmodifiableMap(clients); }
 
     public synchronized void broadcastMessage(String message, String username){
         String GREEN = "\u001B[32m";
@@ -22,8 +28,6 @@ public class Server {
                 }else { client.sendMessage(GREEN + message + RESET); }
          }
     }
-
-    public void addClient(ClientHandler client){ clients.put(client.username(), client); }
 
     static void main(String[] args) throws IOException{
         Server server = new Server();
