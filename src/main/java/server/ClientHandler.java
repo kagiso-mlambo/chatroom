@@ -43,6 +43,8 @@ public class ClientHandler implements  Runnable{
     private void closeClient() throws IOException{
         clientSocket.close();
 
+        server.removeClient(username);
+
         String exitNotificationMessage = BOLD.code() + "------------------------------" +
                  "Server: " + username + " has left the chat!" +
                  "------------------------------" + RESET.code() + "\n";
@@ -81,6 +83,7 @@ public class ClientHandler implements  Runnable{
                 if (channels.containsKey(args[1]) && (channels.get(args[1]).creator().equals(username))){
                     channels.remove(args[1]);
                 }
+                break;
             }
 
             case "/rooms": {

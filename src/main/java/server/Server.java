@@ -8,8 +8,8 @@ import java.util.HashMap;
 import static server.ANSICodes.*;
 
 public class Server {
-    private static HashMap<String, ClientHandler> clients;
-    private static HashMap<String, Channel> channels;
+    private HashMap<String, ClientHandler> clients;
+    private HashMap<String, Channel> channels;
 
 
 
@@ -21,10 +21,13 @@ public class Server {
     }
 
 
+    public HashMap<String, ClientHandler> clients() { return clients; }
+
+
     public void addClient(String clientName, ClientHandler client){ clients.put(clientName, client); }
 
 
-    public HashMap<String, ClientHandler> clients() { return clients; }
+    public void removeClient(String clientName){ clients.remove(clientName); }
 
 
     public void addChannel(String channelName, String creator){ channels.put(channelName, new Channel(channelName, creator)); }
@@ -75,13 +78,13 @@ public class Server {
     }
 
 
-    static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException{
         Server server = new Server();
         ServerSocket severSocket = new ServerSocket(8081);
 
         while(true) {
             Socket clientSocket = severSocket.accept();
-            Channel general = channels.get("general");
+            Channel general = server.channels().get("general");
             ClientHandler clientHandler = new ClientHandler(server, clientSocket, general);
             new Thread(clientHandler).start();
 
