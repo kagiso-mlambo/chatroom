@@ -19,6 +19,7 @@ public class ClientHandler implements  Runnable{
     String BOLD = "\u001B[1m";
     String RESET = "\u001B[0m";
     String ITALICS = "\u001b[3m";
+    String UNDERLINE = "\u001B[4m";
 
     public ClientHandler(Server server, Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
@@ -45,7 +46,9 @@ public class ClientHandler implements  Runnable{
                 closeClient();
             case "/users":
                 Map<String, ClientHandler> clients = server.clients();
+                sendMessage(UNDERLINE + BOLD + "Online Users:" + RESET);
                 for (String client: clients.keySet()){if (!this.username.equals(client)) sendMessage(client); }
+                sendMessage("\n");
         }
     }
 

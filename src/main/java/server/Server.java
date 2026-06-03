@@ -18,14 +18,11 @@ public class Server {
     public Map<String, ClientHandler> clients() { return Collections.unmodifiableMap(clients); }
 
     public synchronized void broadcastMessage(String message, String username){
-        String GREEN = "\u001B[32m";
-        String RESET = "\u001B[0m";
-
          for (ClientHandler client: clients.values()){
                 if (!client.username().equals(username)) {
-                    String newMessage = String.format("%50s", message);
+                    String newMessage = " ".repeat(50) + message;
                     client.sendMessage(newMessage);
-                }else { client.sendMessage(GREEN + message + RESET); }
+                }else { client.sendMessage(message); }
          }
     }
 
