@@ -12,7 +12,7 @@ public class Client {
     private static BufferedReader bufferedReader;
 
 
-    public static void main(String[] args) throws IOException{
+    static void main(String[] args) throws IOException{
         System.out.println("Please enter your username: ");
         username = sc.nextLine();
         System.out.print("\033[H\033[2J");
