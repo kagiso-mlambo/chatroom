@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import java.util.HashMap;
 
 import static server.ANSICodes.*;
@@ -54,8 +55,6 @@ public class ClientHandler implements  Runnable{
 
 
     private void commands(String command) throws IOException{
-        HashMap<String, ClientHandler> clients = server.clients();
-        HashMap<String, Channel> channels = server.channels();
 
         String[] args = command.split(" ");
         switch (args[0]){
@@ -63,7 +62,7 @@ public class ClientHandler implements  Runnable{
 
             case "/users":{
                 sendMessage(UNDERLINE.code() + BOLD.code() + "Online Users:" + RESET.code());
-                for (ClientHandler client: clients.values()){if (!this.username.equals(client.username())) sendMessage(client.username()); }
+                for (ClientHandler client: server.getAllClients()){if (!this.username.equals(client.username())) sendMessage(client.username()); }
                 sendMessage("\n");
                 break;
             }
@@ -80,15 +79,13 @@ public class ClientHandler implements  Runnable{
             }
 
             case "/delete":{
-                if (channels.containsKey(args[1]) && (channels.get(args[1]).creator().equals(username))){
-                    channels.remove(args[1]);
-                }
+                server.deleteChannel(args[1], username);
                 break;
             }
 
             case "/rooms": {
                 sendMessage(UNDERLINE.code() + BOLD.code() + "Available Rooms:" + RESET.code());
-                for (Channel channel: channels.values()){ if (!clients.containsKey(channel.name())) { sendMessage(channel.name());} }
+                for (Channel channel: server.getAllChannels()){ sendMessage(channel.name()); }
                 sendMessage("\n");
                 break;
             }
@@ -96,10 +93,7 @@ public class ClientHandler implements  Runnable{
             default:
             {
                 command = command.replace("/", "");
-                if (clients.containsKey(command.toLowerCase())){
-                    server.privateMessage(command, username);
-                    sendMessage("starting a private chat with " + command);
-                } else { sendMessage("This user does not exist");}
+                server.privateMessage(command, username);
             }
 
         }

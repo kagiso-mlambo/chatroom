@@ -3,7 +3,9 @@ package server;
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Set;
 
 import static server.ANSICodes.*;
 
@@ -21,22 +23,36 @@ public class Server {
     }
 
 
-    public HashMap<String, ClientHandler> clients() { return clients; }
-
-
     public void addClient(String clientName, ClientHandler client){ clients.put(clientName, client); }
 
 
     public void removeClient(String clientName){ clients.remove(clientName); }
 
+    public Collection<ClientHandler> getAllClients(){ return clients.values(); }
 
-    public void addChannel(String channelName, String creator){ channels.put(channelName, new Channel(channelName, creator)); }
+
+    public void addChannel(String channelName, String creator){
+        channels.put(channelName, new Channel(channelName, creator));
+    }
 
 
-    public HashMap<String, Channel> channels() { return channels; }
+    public void deleteChannel(String channelName, String username){
+        if (channels.containsKey(channelName) && (channels.get(channelName).creator().equals(username))){
+            channels.remove(channelName);
+        }
+    }
+
+
+    public Channel getAChannel(String channelName){
+        return channels.get(channelName);
+    }
+
+
+    public Collection<Channel> getAllChannels(){ return channels.values(); }
 
 
     public synchronized void privateMessage(String receiver, String sender){
+        if (clients.containsKey(receiver)){
         Channel channel = channels.get(receiver);
         ClientHandler member;
 
@@ -48,6 +64,8 @@ public class Server {
         member = clients.get(sender);
         channel.addMembers(member);
         member.updateChannel(channel);
+
+        } else {clients.get(sender).sendMessage("This user does not exist!");}
     }
 
 
@@ -84,7 +102,7 @@ public class Server {
 
         while(true) {
             Socket clientSocket = severSocket.accept();
-            Channel general = server.channels().get("general");
+            Channel general = server.getAChannel("general");
             ClientHandler clientHandler = new ClientHandler(server, clientSocket, general);
             new Thread(clientHandler).start();
 
