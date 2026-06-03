@@ -19,6 +19,7 @@ public class ClientHandler implements  Runnable{
     private BufferedReader bufferedReader;
     private final Server server;
     private Channel channel;
+    private CommandProcessor commandProcessor;
 
     public ClientHandler(Server server, Socket clientSocket, Channel channel) throws IOException {
         this.clientSocket = clientSocket;
@@ -41,7 +42,7 @@ public class ClientHandler implements  Runnable{
     public void sendMessage(String message){ printWriter.println(message); }
 
 
-    private void closeClient() throws IOException{
+    public void closeClient() throws IOException{
         clientSocket.close();
 
         server.removeClient(username);
@@ -54,56 +55,10 @@ public class ClientHandler implements  Runnable{
     }
 
 
-    private void commands(String command) throws IOException{
-
-        String[] args = command.split(" ");
-        switch (args[0]){
-            case "/quit": { closeClient(); break; }
-
-            case "/users":{
-                sendMessage(UNDERLINE.code() + BOLD.code() + "Online Users:" + RESET.code());
-                for (ClientHandler client: server.getAllClients()){if (!this.username.equals(client.username())) sendMessage(client.username()); }
-                sendMessage("\n");
-                break;
-            }
-
-            case "/create":{
-                server.addChannel(args[1], username);
-                sendMessage(BOLD.code() + "You've created the channel \"" + args[1] + "\" use /join to enter" + RESET.code());
-                break;
-            }
-
-            case "/join":{
-                server.joinNewChannel(username, args[1]);
-                break;
-            }
-
-            case "/delete":{
-                server.deleteChannel(args[1], username);
-                break;
-            }
-
-            case "/rooms": {
-                sendMessage(UNDERLINE.code() + BOLD.code() + "Available Rooms:" + RESET.code());
-                for (Channel channel: server.getAllChannels()){ sendMessage(channel.name()); }
-                sendMessage("\n");
-                break;
-            }
-
-            default:
-            {
-                command = command.replace("/", "");
-                server.privateMessage(command, username);
-            }
-
-        }
-    }
-
-
     @Override
     public void run() {
         try {
-
+            commandProcessor = new CommandProcessor(server, this);
             String request;
             username = bufferedReader.readLine().toLowerCase();
             sendMessage(BOLD.code() + ITALICS.code() + LocalDate.now() + RESET.code() + "\n");
@@ -127,7 +82,7 @@ public class ClientHandler implements  Runnable{
                     server.broadcastAll(message, username, channel);
                 }
                 else{
-                    commands(request);
+                    commandProcessor.handleCommand(request);
                 }
             }
 
