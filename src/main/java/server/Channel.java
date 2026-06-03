@@ -4,16 +4,21 @@ import java.util.ArrayList;
 
 public class Channel {
     private String name;
+    private String creator;
     private ArrayList<ClientHandler> members;
 
 
-    public Channel(String name){
+    public Channel(String name, String creator){
         this.name = name;
+        this.creator = creator;
         members = new ArrayList<>();
     }
 
 
     public String name() {return name; }
+
+
+    public String creator() {return creator; }
 
 
     public void addMembers(ClientHandler client){ members.add(client); }

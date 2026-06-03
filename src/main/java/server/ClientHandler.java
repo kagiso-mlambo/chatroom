@@ -59,13 +59,39 @@ public class ClientHandler implements  Runnable{
 
     private void commands(String command) throws IOException{
         HashMap<String, ClientHandler> clients = server.clients();
+        HashMap<String, Channel> channels = server.channels();
 
-        switch (command){
+        String[] args = command.split(" ");
+        switch (args[0]){
             case "/quit": { closeClient(); break; }
 
             case "/users":{
                 sendMessage(UNDERLINE + BOLD + "Online Users:" + RESET);
                 for (ClientHandler client: clients.values()){if (!this.username.equals(client.username())) sendMessage(client.username()); }
+                sendMessage("\n");
+                break;
+            }
+
+            case "/create":{
+                server.addChannel(args[1], username);
+                sendMessage(BOLD + "You've created the channel \"" + args[1] + "\" use /join to enter" + RESET);
+                break;
+            }
+
+            case "/join":{
+                server.joinNewChannel(username, args[1]);
+                break;
+            }
+
+            case "/delete":{
+                if (channels.containsKey(args[1]) && (channels.get(args[1]).creator().equals(username))){
+                    channels.remove(args[1]);
+                }
+            }
+
+            case "/rooms": {
+                sendMessage(UNDERLINE + BOLD + "Available Rooms:" + RESET);
+                for (Channel channel: channels.values()){ if (!clients.containsKey(channel.name())) { sendMessage(channel.name());} }
                 sendMessage("\n");
                 break;
             }
@@ -96,8 +122,8 @@ public class ClientHandler implements  Runnable{
                     "------------------------------" + "\n" + RESET;
             server.broadcastAll(joinNotificationMessage, username, channel);
 
-            server.addClient(username.toLowerCase(), this);
-            server.addChannel(username.toLowerCase());
+            server.addClient(username, this);
+            server.addChannel(username.toLowerCase(), username);
             channel.addMembers(this);
 
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");

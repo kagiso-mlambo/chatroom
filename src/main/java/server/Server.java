@@ -11,11 +11,14 @@ public class Server {
     private static HashMap<String, ClientHandler> clients;
     private static HashMap<String, Channel> channels;
 
+    String BOLD = "\u001B[1m";
+    String RESET = "\u001B[0m";
+
 
     public Server(){
         clients = new HashMap<>();
         channels = new HashMap<>();
-        Channel mainChannel = new Channel("general");
+        Channel mainChannel = new Channel("general", "server");
         channels.put(mainChannel.name(), mainChannel);
     }
 
@@ -26,7 +29,10 @@ public class Server {
     public HashMap<String, ClientHandler> clients() { return clients; }
 
 
-    public void addChannel(String channelName){ channels.put(channelName, new Channel(channelName)); }
+    public void addChannel(String channelName, String creator){ channels.put(channelName, new Channel(channelName, creator)); }
+
+
+    public HashMap<String, Channel> channels() { return channels; }
 
 
     public synchronized void privateMessage(String receiver, String sender){
@@ -41,6 +47,22 @@ public class Server {
         member = clients.get(sender);
         channel.addMembers(member);
         member.updateChannel(channel);
+    }
+
+
+    public synchronized void joinNewChannel(String username, String channelName){
+        Channel channel = channels.get(channelName);
+        ClientHandler member = clients.get(username);
+
+        channel.addMembers(member);
+        member.updateChannel(channel);
+        member.sendMessage("You are now in " + channelName);
+
+        String joinNotificationMessage = BOLD + "\n" + "------------------------------" +
+                "Server: " + username + " has joined the " + channelName +
+                "------------------------------" + "\n" + RESET;
+
+        broadcastAll(joinNotificationMessage, username, channel);
     }
 
 
