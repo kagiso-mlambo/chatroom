@@ -7,8 +7,9 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
+
+import static server.ANSICodes.*;
 
 public class ClientHandler implements  Runnable{
     private String username;
@@ -17,13 +18,6 @@ public class ClientHandler implements  Runnable{
     private BufferedReader bufferedReader;
     private final Server server;
     private Channel channel;
-
-
-    String BOLD = "\u001B[1m";
-    String RESET = "\u001B[0m";
-    String ITALICS = "\u001b[3m";
-    String UNDERLINE = "\u001B[4m";
-
 
     public ClientHandler(Server server, Socket clientSocket, Channel channel) throws IOException {
         this.clientSocket = clientSocket;
@@ -49,9 +43,9 @@ public class ClientHandler implements  Runnable{
     private void closeClient() throws IOException{
         clientSocket.close();
 
-        String exitNotificationMessage = BOLD + "------------------------------" + "\u001B[0m" +
-                "\u001B[1m" + "Server: " + username + " has left the chat!" + "\u001B[0m" +
-                "\u001B[1m" + "------------------------------" + "\u001B[0m\n";
+        String exitNotificationMessage = BOLD.code() + "------------------------------" +
+                 "Server: " + username + " has left the chat!" +
+                 "------------------------------" + RESET.code() + "\n";
 
         server.broadcastAll(exitNotificationMessage, username, channel);
     }
@@ -66,7 +60,7 @@ public class ClientHandler implements  Runnable{
             case "/quit": { closeClient(); break; }
 
             case "/users":{
-                sendMessage(UNDERLINE + BOLD + "Online Users:" + RESET);
+                sendMessage(UNDERLINE.code() + BOLD.code() + "Online Users:" + RESET.code());
                 for (ClientHandler client: clients.values()){if (!this.username.equals(client.username())) sendMessage(client.username()); }
                 sendMessage("\n");
                 break;
@@ -74,7 +68,7 @@ public class ClientHandler implements  Runnable{
 
             case "/create":{
                 server.addChannel(args[1], username);
-                sendMessage(BOLD + "You've created the channel \"" + args[1] + "\" use /join to enter" + RESET);
+                sendMessage(BOLD.code() + "You've created the channel \"" + args[1] + "\" use /join to enter" + RESET.code());
                 break;
             }
 
@@ -90,7 +84,7 @@ public class ClientHandler implements  Runnable{
             }
 
             case "/rooms": {
-                sendMessage(UNDERLINE + BOLD + "Available Rooms:" + RESET);
+                sendMessage(UNDERLINE.code() + BOLD.code() + "Available Rooms:" + RESET.code());
                 for (Channel channel: channels.values()){ if (!clients.containsKey(channel.name())) { sendMessage(channel.name());} }
                 sendMessage("\n");
                 break;
@@ -115,11 +109,11 @@ public class ClientHandler implements  Runnable{
 
             String request;
             username = bufferedReader.readLine().toLowerCase();
-            sendMessage(BOLD + ITALICS + LocalDate.now() + RESET + "\n");
+            sendMessage(BOLD.code() + ITALICS.code() + LocalDate.now() + RESET.code() + "\n");
 
-            String joinNotificationMessage = BOLD + "\n" + "------------------------------" +
+            String joinNotificationMessage = BOLD.code() + "\n" + "------------------------------" +
                     "Server: " + username + " has joined the chat!"+
-                    "------------------------------" + "\n" + RESET;
+                    "------------------------------" + "\n" + RESET.code();
             server.broadcastAll(joinNotificationMessage, username, channel);
 
             server.addClient(username, this);
@@ -131,7 +125,7 @@ public class ClientHandler implements  Runnable{
             while ((request = bufferedReader.readLine()) != null){
 
                 if (!request.startsWith("/")) {
-                    String message = ITALICS + "[" + LocalTime.now().format(timeFormatter) + "] " + RESET +
+                    String message = ITALICS.code() + "[" + LocalTime.now().format(timeFormatter) + "] " + RESET.code() +
                             username + ": " + request;
                     server.broadcastAll(message, username, channel);
                 }

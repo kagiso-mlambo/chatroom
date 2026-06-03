@@ -3,16 +3,14 @@ package server;
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
+
+import static server.ANSICodes.*;
 
 public class Server {
     private static HashMap<String, ClientHandler> clients;
     private static HashMap<String, Channel> channels;
 
-    String BOLD = "\u001B[1m";
-    String RESET = "\u001B[0m";
 
 
     public Server(){
@@ -58,9 +56,9 @@ public class Server {
         member.updateChannel(channel);
         member.sendMessage("You are now in " + channelName);
 
-        String joinNotificationMessage = BOLD + "\n" + "------------------------------" +
+        String joinNotificationMessage = BOLD.code() + "\n" + "------------------------------" +
                 "Server: " + username + " has joined the " + channelName +
-                "------------------------------" + "\n" + RESET;
+                "------------------------------" + "\n" + RESET.code();
 
         broadcastAll(joinNotificationMessage, username, channel);
     }
