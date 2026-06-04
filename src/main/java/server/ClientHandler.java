@@ -7,10 +7,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.HashMap;
 
-import static server.ANSICodes.*;
+import static common.ANSICodes.*;
 
 public class ClientHandler implements  Runnable{
     private String username;

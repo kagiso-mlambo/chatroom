@@ -2,7 +2,7 @@ package server;
 
 import java.io.IOException;
 
-import static server.ANSICodes.*;
+import static common.ANSICodes.*;
 
 public class CommandProcessor {
     private Server server;

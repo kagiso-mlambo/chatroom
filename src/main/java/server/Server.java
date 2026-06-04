@@ -5,9 +5,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Set;
 
-import static server.ANSICodes.*;
+import static common.ANSICodes.*;
 
 public class Server {
     private HashMap<String, ClientHandler> clients;
