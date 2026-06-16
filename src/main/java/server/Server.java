@@ -1,7 +1,13 @@
 package server;
 
+import database.DatabaseConnection;
+import database.DatabaseInitialiser;
+import database.UserRepository;
+
 import java.net.*;
 import java.io.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,23 +17,41 @@ import static common.ANSICodes.*;
 public class Server {
     private HashMap<String, ClientHandler> clients;
     private HashMap<String, Channel> channels;
+    private UserRepository userRepo;
 
 
 
-    public Server(){
+    public Server() throws SQLException {
         clients = new HashMap<>();
         channels = new HashMap<>();
-        Channel mainChannel = new Channel("general", "server");
-        channels.put(mainChannel.name(), mainChannel);
+//        Channel mainChannel = new Channel("general", "server");
+//        channels.put(mainChannel.name(), mainChannel);
+        DatabaseInitialiser.initialise();
+        Connection connection = DatabaseConnection.getConnection();
+        userRepo = new UserRepository(connection);
+    }
+
+    public String logIn(String[] userCredentials){
+        return userRepo.logIn(userCredentials);
+    }
+
+    public String signUp(String[] userCredentials){
+        return userRepo.signUp(userCredentials);
     }
 
 
-    public void addClient(String clientName, ClientHandler client){ clients.put(clientName, client); }
+    public void addClient(String clientName, ClientHandler client){
+        clients.put(clientName, client);
+    }
 
 
-    public void removeClient(String clientName){ clients.remove(clientName); }
+    public void removeClient(String clientName){
+        clients.remove(clientName);
+    }
 
-    public Collection<ClientHandler> getAllClients(){ return clients.values(); }
+    public Collection<ClientHandler> getAllClients(){
+        return clients.values();
+    }
 
 
     public void addChannel(String channelName, String creator){
@@ -47,7 +71,24 @@ public class Server {
     }
 
 
-    public Collection<Channel> getAllChannels(){ return channels.values(); }
+    public Collection<Channel> getAllChannels(){
+        return channels.values();
+    }
+
+    public synchronized void joinNewChannel(String username, String channelName){
+        Channel channel = channels.get(channelName);
+        ClientHandler member = clients.get(username);
+
+        channel.addMembers(member);
+        member.updateChannel(channel);
+        member.sendMessage("You are now in " + channelName);
+
+        String joinNotificationMessage = BOLD.code() + "\n" + "------------------------------" +
+                "Server: " + username + " has joined the " + channelName +
+                "------------------------------" + "\n" + RESET.code();
+
+        broadcastAll(joinNotificationMessage, username, channel);
+    }
 
 
     public synchronized void privateMessage(String receiver, String sender){
@@ -68,22 +109,6 @@ public class Server {
     }
 
 
-    public synchronized void joinNewChannel(String username, String channelName){
-        Channel channel = channels.get(channelName);
-        ClientHandler member = clients.get(username);
-
-        channel.addMembers(member);
-        member.updateChannel(channel);
-        member.sendMessage("You are now in " + channelName);
-
-        String joinNotificationMessage = BOLD.code() + "\n" + "------------------------------" +
-                "Server: " + username + " has joined the " + channelName +
-                "------------------------------" + "\n" + RESET.code();
-
-        broadcastAll(joinNotificationMessage, username, channel);
-    }
-
-
     public synchronized void broadcastAll(String message, String username, Channel channel){
         ArrayList<ClientHandler> members = channel.members();
          for (ClientHandler client: members){
@@ -95,14 +120,14 @@ public class Server {
     }
 
 
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException, SQLException {
         Server server = new Server();
         ServerSocket severSocket = new ServerSocket(8081);
 
         while(true) {
             Socket clientSocket = severSocket.accept();
-            Channel general = server.getAChannel("general");
-            ClientHandler clientHandler = new ClientHandler(server, clientSocket, general);
+//            Channel general = server.getAChannel("general");
+            ClientHandler clientHandler = new ClientHandler(server, clientSocket);
             new Thread(clientHandler).start();
 
 

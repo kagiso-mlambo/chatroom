@@ -19,10 +19,10 @@ public class ClientHandler implements  Runnable{
     private Channel channel;
     private CommandProcessor commandProcessor;
 
-    public ClientHandler(Server server, Socket clientSocket, Channel channel) throws IOException {
+    public ClientHandler(Server server, Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
         this.server = server;
-        this.channel = channel;
+//        this.channel = channel;
         printWriter = new PrintWriter(clientSocket.getOutputStream(), true);
         bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
@@ -58,17 +58,17 @@ public class ClientHandler implements  Runnable{
         try {
             commandProcessor = new CommandProcessor(server, this);
             String request;
-            username = bufferedReader.readLine().toLowerCase();
-            sendMessage(BOLD.code() + ITALICS.code() + LocalDate.now() + RESET.code() + "\n");
+            String[] user_credentials = bufferedReader.readLine().toLowerCase().split(" ");
 
-            String joinNotificationMessage = BOLD.code() + "\n" + "------------------------------" +
-                    "Server: " + username + " has joined the chat!"+
-                    "------------------------------" + "\n" + RESET.code();
-            server.broadcastAll(joinNotificationMessage, username, channel);
+            if (user_credentials[0].equals("logIn")) printWriter.println(server.logIn(user_credentials));
+            else printWriter.println(server.signUp(user_credentials));
+
+            username = user_credentials[1];
+
+            commandProcessor.handleCommand("/users");
+            commandProcessor.handleCommand("/rooms");
 
             server.addClient(username, this);
-            server.addChannel(username.toLowerCase(), username);
-            channel.addMembers(this);
 
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
