@@ -17,7 +17,7 @@ public class ClientHandler implements  Runnable{
     private PrintWriter printWriter;
     private BufferedReader bufferedReader;
     private final Server server;
-    private Channel channel;
+    private String channel;
     private CommandProcessor commandProcessor;
 
     public ClientHandler(Server server, Socket clientSocket) throws IOException {
@@ -32,8 +32,7 @@ public class ClientHandler implements  Runnable{
     public String username(){ return username; }
 
 
-    public void updateChannel(Channel channel){
-        this.channel.removeMembers(this);
+    public void updateChannel(String channel){
         this.channel = channel;
     }
 
@@ -84,6 +83,8 @@ public class ClientHandler implements  Runnable{
             server.addClient(username, this);
 
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+            request = bufferedReader.readLine();
 
             while ((request = bufferedReader.readLine()) != null){
 

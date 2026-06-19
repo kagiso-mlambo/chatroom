@@ -15,14 +15,14 @@ public class UserRepository {
     public String logIn(String[] userCredentials) throws SQLException {
         String query = "SELECT password_hash FROM users WHERE username = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-            pstmt.setString(1, userCredentials[0]);
+            pstmt.setString(1, userCredentials[1]);
             try (ResultSet result = pstmt.executeQuery()) {
                 if (!result.next()) {
-                    return "Username or password was entered incorrectly!\nIf you don't have an account please sign up.";
+                    return "Username was entered incorrectly!.";
                 }
-                String storedPassword = result.getString("password");
-                if (!userCredentials[1].equals(storedPassword)) {
-                    return "Username or password was entered incorrectly!\nIf you don't have an account please sign up.";
+                String storedPassword = result.getString("password_hash");
+                if (!userCredentials[2].equals(storedPassword)) {
+                    return "Password was entered incorrectly. If you don't have an account please sign up.";
                 }
             }
         }
@@ -42,5 +42,32 @@ public class UserRepository {
             throw e;
         }
         return "Sign up successful!";
+    }
+
+    public boolean checkIfUserExists(String username) throws SQLException{
+        String query = "SELECT * FROM users WHERE username = ?";
+
+        try(PreparedStatement preparedStatement = connection.prepareStatement(query)){
+            preparedStatement.setString(1, username);
+            ResultSet result = preparedStatement.executeQuery();
+            if (result.next()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int getUserId(String username) throws SQLException{
+        String query = "SELECT user_id FROM users WHERE username = ?";
+        int id = -1;
+
+        try(PreparedStatement preparedStatement = connection.prepareStatement(query)){
+            preparedStatement.setString(1, username);
+            ResultSet result = preparedStatement.executeQuery();
+            if (result.next()){
+                id = result.getInt("user_id");
+            }
+        }
+        return id;
     }
 }

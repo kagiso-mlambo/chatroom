@@ -1,6 +1,7 @@
 package server;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import static common.ANSICodes.*;
 
@@ -13,7 +14,7 @@ public class CommandProcessor {
         this.client = client;
     }
 
-    public void handleCommand(String command) throws IOException {
+    public void handleCommand(String command) throws IOException, SQLException {
         String[] args = command.split(" ");
         switch (args[0]){
             case "/quit": { client.closeClient(); break; }
@@ -45,7 +46,7 @@ public class CommandProcessor {
 
             case "/rooms": {
                 client.sendMessage(UNDERLINE.code() + BOLD.code() + "Available Rooms:" + RESET.code());
-                for (Channel channel: server.getAllChannels()){ client.sendMessage(channel.name()); }
+                for (Channel channel: server.getAllChats()){ client.sendMessage(channel.name()); }
                 client.sendMessage("\n");
                 break;
             }

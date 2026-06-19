@@ -1,8 +1,7 @@
 package server;
 
-import database.DatabaseConnection;
-import database.DatabaseInitialiser;
-import database.UserRepository;
+import client.Client;
+import database.*;
 
 import java.net.*;
 import java.io.*;
@@ -18,6 +17,8 @@ public class Server {
     private HashMap<String, ClientHandler> clients;
     private HashMap<String, Channel> channels;
     private UserRepository userRepo;
+    private ChannelRepository channelRepo;
+    private ChannelMembersRepository channelMembersRepo;
 
 
 
@@ -29,6 +30,8 @@ public class Server {
         DatabaseInitialiser.initialise();
         Connection connection = DatabaseConnection.getConnection();
         userRepo = new UserRepository(connection);
+        channelMembersRepo = new ChannelMembersRepository(connection);
+        channelRepo = new ChannelRepository(connection, channelMembersRepo, userRepo);
     }
 
     public String logIn(String[] userCredentials) throws SQLException {
@@ -71,52 +74,52 @@ public class Server {
     }
 
 
-    public Collection<Channel> getAllChannels(){
-        return channels.values();
+    public ArrayList<String> getAllChats(){
+        ArrayList<String> usersChannels = new ArrayList<>();
+        //Get users id
+        // Get all group channels user is a member of
+        // return an Arraylist of the names
+
+        return new ArrayList<>();
     }
 
     public synchronized void joinNewChannel(String username, String channelName){
-        Channel channel = channels.get(channelName);
-        ClientHandler member = clients.get(username);
-
-        channel.addMembers(member);
-        member.updateChannel(channel);
-        member.sendMessage("You are now in " + channelName);
-
-        String joinNotificationMessage = BOLD.code() + "\n" + "------------------------------" +
-                "Server: " + username + " has joined the " + channelName +
-                "------------------------------" + "\n" + RESET.code();
-
-        broadcastAll(joinNotificationMessage, username, channel);
+//        Channel channel = channels.get(channelName);
+//        ClientHandler member = clients.get(username);
+//
+//        channel.addMembers(member);
+//        member.updateChannel(channel);
+//        member.sendMessage("You are now in " + channelName);
+//
+//        String joinNotificationMessage = BOLD.code() + "\n" + "------------------------------" +
+//                "Server: " + username + " has joined the " + channelName +
+//                "------------------------------" + "\n" + RESET.code();
+//
+//        broadcastAll(joinNotificationMessage, username, channel);
     }
 
 
-    public synchronized void privateMessage(String receiver, String sender){
-        if (clients.containsKey(receiver)){
-        Channel channel = channels.get(receiver);
-        ClientHandler member;
+    public synchronized void privateMessage(String receiver, String sender) throws SQLException{
+        if (userRepo.checkIfUserExists(receiver)){
+            String channel;
+            if (sender.compareTo(receiver) <= 0) { channel = sender + "_" + receiver; }
+            else { channel = receiver + "_" + sender; }
 
-        member = clients.get(receiver);
-        channel.addMembers(member);
-        member.updateChannel(channel);
-        member.sendMessage("starting a private chat with " + sender);
-
-        member = clients.get(sender);
-        channel.addMembers(member);
-        member.updateChannel(channel);
-
+            int channelID = channelRepo.getChannelId(channel, "private", sender, receiver);
+            clients.get(sender).updateChannel(channel);
+            clients.get(sender).sendMessage("Private Message with " + receiver);
         } else {clients.get(sender).sendMessage("This user does not exist!");}
     }
 
 
-    public synchronized void broadcastAll(String message, String username, Channel channel){
-        ArrayList<ClientHandler> members = channel.members();
-         for (ClientHandler client: members){
-                if (!client.username().equals(username)) {
-                    String newMessage = " ".repeat(50) + message;
-                    client.sendMessage(newMessage);
-                }else { client.sendMessage(message); }
-         }
+    public synchronized void broadcastAll(String message, String username, String channel){
+//        ArrayList<ClientHandler> members = channel.members();
+//         for (ClientHandler client: members){
+//                if (!client.username().equals(username)) {
+//                    String newMessage = " ".repeat(50) + message;
+//                    client.sendMessage(newMessage);
+//                }else { client.sendMessage(message); }
+//         }
     }
 
 
