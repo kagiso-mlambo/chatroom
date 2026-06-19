@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 
@@ -58,10 +59,22 @@ public class ClientHandler implements  Runnable{
         try {
             commandProcessor = new CommandProcessor(server, this);
             String request;
-            String[] user_credentials = bufferedReader.readLine().toLowerCase().split(" ");
+            String[] user_credentials = null;
 
-            if (user_credentials[0].equals("logIn")) printWriter.println(server.logIn(user_credentials));
-            else printWriter.println(server.signUp(user_credentials));
+            while (true) {
+                user_credentials = bufferedReader.readLine().split(" ");
+                user_credentials[0] = user_credentials[0].toLowerCase();
+
+                String response;
+                if (user_credentials[0].equals("login")) response = server.logIn(user_credentials);
+                else response = server.signUp(user_credentials);
+
+                printWriter.println(response);
+
+                if (response.equals("Logged in successfully") || response.equals("Sign up successful!")) {
+                    break;
+                }
+            }
 
             username = user_credentials[1];
 
@@ -84,8 +97,8 @@ public class ClientHandler implements  Runnable{
                 }
             }
 
-        } catch (IOException e) {
-            System.out.println( username + " has disconnected");
+        } catch (IOException | SQLException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

@@ -31,11 +31,11 @@ public class Server {
         userRepo = new UserRepository(connection);
     }
 
-    public String logIn(String[] userCredentials){
+    public String logIn(String[] userCredentials) throws SQLException {
         return userRepo.logIn(userCredentials);
     }
 
-    public String signUp(String[] userCredentials){
+    public String signUp(String[] userCredentials) throws SQLException {
         return userRepo.signUp(userCredentials);
     }
 
