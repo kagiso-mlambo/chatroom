@@ -20,12 +20,17 @@ public class ClientHandler implements  Runnable{
     private String channel;
     private CommandProcessor commandProcessor;
 
-    public ClientHandler(Server server, Socket clientSocket) throws IOException {
+    public ClientHandler(Server server, Socket clientSocket) {
         this.clientSocket = clientSocket;
         this.server = server;
-//        this.channel = channel;
-        printWriter = new PrintWriter(clientSocket.getOutputStream(), true);
-        bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        this.channel = null;
+        try {
+            printWriter = new PrintWriter(clientSocket.getOutputStream(), true);
+            bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        } catch (IOException e) {
+            System.out.println("ClientHandler - Constructor: ");
+            System.out.println(e);
+        }
     }
 
 
@@ -40,9 +45,7 @@ public class ClientHandler implements  Runnable{
     public void sendMessage(String message){ printWriter.println(message); }
 
 
-    public void closeClient() throws IOException{
-        clientSocket.close();
-
+    public void closeClient() {
         server.removeClient(username);
 
         String exitNotificationMessage = BOLD.code() + "------------------------------" +
@@ -50,6 +53,13 @@ public class ClientHandler implements  Runnable{
                  "------------------------------" + RESET.code() + "\n";
 
         server.broadcastAll(exitNotificationMessage, username, channel);
+
+        try {
+            clientSocket.close();
+        } catch (IOException e) {
+            System.out.println("ClientHandler - Method closeClient: ");
+            System.out.println(e);
+        }
     }
 
 
@@ -99,8 +109,9 @@ public class ClientHandler implements  Runnable{
                 }
             }
 
-        } catch (IOException | SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            System.out.println("ClientHandler - Method run: ");
+            System.out.println(e);
         }
     }
 }

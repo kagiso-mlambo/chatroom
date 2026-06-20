@@ -25,8 +25,6 @@ public class Server {
     public Server() throws SQLException {
         clients = new HashMap<>();
         channels = new HashMap<>();
-//        Channel mainChannel = new Channel("general", "server");
-//        channels.put(mainChannel.name(), mainChannel);
         DatabaseInitialiser.initialise();
         Connection connection = DatabaseConnection.getConnection();
         userRepo = new UserRepository(connection);
@@ -34,11 +32,11 @@ public class Server {
         channelRepo = new ChannelRepository(connection, channelMembersRepo, userRepo);
     }
 
-    public String logIn(String[] userCredentials) throws SQLException {
+    public String logIn(String[] userCredentials) {
         return userRepo.logIn(userCredentials);
     }
 
-    public String signUp(String[] userCredentials) throws SQLException {
+    public String signUp(String[] userCredentials) {
         return userRepo.signUp(userCredentials);
     }
 
@@ -57,15 +55,20 @@ public class Server {
     }
 
 
-    public void addGroupChannel(String channelName, String creator) throws SQLException{
+    public void addGroupChannel(String channelName, String creator){
         channelRepo.createGroupChannel(channelName, creator);
     }
 
 
-    public void deleteChannel(String channelName, String username) throws SQLException{
-        boolean deleted = channelRepo.deleteChannel(channelName);
-        if (deleted) clients.get(username).sendMessage("Channel successfully deleted");
-        else clients.get(username).sendMessage("Could not delete channel");
+    public void deleteChannel(String channelName, String username) {
+        try {
+            boolean deleted = channelRepo.deleteChannel(channelName);
+            if (deleted) clients.get(username).sendMessage("Channel successfully deleted");
+            else clients.get(username).sendMessage("Could not delete channel");
+        } catch (SQLException e) {
+            System.out.println("Server - Method deleteChannel: ");
+            System.out.println(e);
+        }
     }
 
 
@@ -74,15 +77,13 @@ public class Server {
     }
 
 
-    public ArrayList<String> getAllGroupChannels(String username) throws SQLException{
-        ArrayList<String> usersChannels = new ArrayList<>();
-        int userID = userRepo.getUserId(username);
-        usersChannels = channelRepo.getUsersChannels(userID);
-
-        return usersChannels;
+    public ArrayList<String> getAllGroupChannels(String username) {
+        int userID = -1;
+        userID = userRepo.getUserId(username);
+        return channelRepo.getUsersChannels(userID);
     }
 
-    public synchronized void joinNewChannel(String username, String channelName) throws SQLException{
+    public synchronized void joinNewChannel(String username, String channelName) {
         String joinNotificationMessage = BOLD.code() + "\n" + "------------------------------" +
                 "Server: " + username + " has joined the " + channelName +
                 "------------------------------" + "\n" + RESET.code();
@@ -98,17 +99,22 @@ public class Server {
     }
 
 
-    public synchronized void privateMessage(String receiver, String sender) throws SQLException{
-        if (userRepo.checkIfUserExists(receiver)){
+    public synchronized void privateMessage(String receiver, String sender) {
+        if (userRepo.checkIfUserExists(receiver)) {
             String channel;
-            if (sender.compareTo(receiver) <= 0) { channel = sender + "_" + receiver; }
-            else { channel = receiver + "_" + sender; }
+            if (sender.compareTo(receiver) <= 0) {
+                channel = sender + "_" + receiver;
+            } else {
+                channel = receiver + "_" + sender;
+            }
 
-            channelRepo.PrivateChannel(channel, sender, receiver);
+            channelRepo.privateChannel(channel, sender, receiver);
 
             clients.get(sender).updateChannel(channel);
             clients.get(sender).sendMessage("Private Message with " + receiver);
-        } else {clients.get(sender).sendMessage("This user does not exist!");}
+        } else {
+            clients.get(sender).sendMessage("This user does not exist!");
+        }
     }
 
 
@@ -120,6 +126,7 @@ public class Server {
 //                    client.sendMessage(newMessage);
 //                }else { client.sendMessage(message); }
 //         }
+        clients.get(username).sendMessage("STILL NEED TO IMPLEMENT BROADCASTING!!!");
     }
 
 

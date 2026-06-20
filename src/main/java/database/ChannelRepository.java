@@ -17,7 +17,7 @@ public class ChannelRepository {
         this.userRepo = userRepo;
     }
 
-    public int getChannelID(String channelName) throws SQLException{
+    public int getChannelID(String channelName){
         int channelID = -1;
         String query = "SELECT channel_id FROM channels WHERE name = ?";
 
@@ -25,13 +25,17 @@ public class ChannelRepository {
             preparedStatement.setString(1, channelName);
             ResultSet results = preparedStatement.executeQuery();
             if (results.next()) channelID = results.getInt("channel_id");
+        } catch (SQLException e) {
+            System.out.println("ChannelRepository - Method getChannelID: ");
+            System.out.println(e);
         }
+
         return channelID;
     }
 
-    public int PrivateChannel(String channelName, String sender, String receiver) throws SQLException {
+    public int privateChannel(String channelName, String sender, String receiver) {
         String selectQuery = "SELECT id FROM channel WHERE name = ?";
-        int channelID;
+        int channelID = -1;
         int userID;
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);){
@@ -42,7 +46,7 @@ public class ChannelRepository {
             else{
                 insertNewChannel(channelName);
 
-                channelID = PrivateChannel(channelName, sender, receiver);
+                channelID = privateChannel(channelName, sender, receiver);
                 int senderUserID = userRepo.getUserId(sender);
                 int receiverUserID = userRepo.getUserId(receiver);
 
@@ -51,22 +55,26 @@ public class ChannelRepository {
             }
 
         } catch (SQLException e) {
-            throw e;
+            System.out.println("ChannelRepository - Method privateChannel: ");
+            System.out.println(e);
         }
         return channelID;
     }
 
-    private void insertNewChannel(String channelName) throws SQLException{
+    private void insertNewChannel(String channelName) {
         String insertQuery = "INSERT INTO channels (name, type) VALUES (?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)){
             preparedStatement.setString(1, channelName);
             preparedStatement.setString(2, "private");
             preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("ChannelRepository - Method insertNewChannel: ");
+            System.out.println(e);
         }
     }
 
-    public ArrayList<String> getUsersChannels(int userID) throws SQLException {
+    public ArrayList<String> getUsersChannels(int userID) {
         ArrayList<String> channels =  new ArrayList<>();
         String channelMemberQuery = "SELECT channel_id FROM channel_members WHERE user_id = ?";
         String channelQuery = "SELECT name FROM channels WHERE channel_id = ? AND type = ?";
@@ -79,20 +87,27 @@ public class ChannelRepository {
                 try(PreparedStatement pstmt = connection.prepareStatement(channelQuery)){
                     pstmt.setInt(1, results.getInt("channel_id"));
                     pstmt.setString(2, "private");
-                    while (results.next()){ channels.add(results.getString("name")); }
+                    ResultSet channelresults = pstmt.executeQuery();
+                    while (channelresults.next()){ channels.add(channelresults.getString("name")); }
                 }
             }
+        } catch (SQLException e){
+            System.out.println("ChannelRepository - Method getUserChannels: ");
+            System.out.println(e);
         }
         return channels;
     }
 
-    public void createGroupChannel(String channelName, String creator) throws SQLException{
+    public void createGroupChannel(String channelName, String creator) {
         String query = "INSERT INTO channels (name, type) VALUES (?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
             preparedStatement.setString(1, channelName);
             preparedStatement.setString(2, "group");
-            preparedStatement.executeUpdate();
+            preparedStatement.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("ChannelRepository - Method createGroupChannel: ");
+            System.out.println(e);
         }
     }
 
@@ -105,6 +120,9 @@ public class ChannelRepository {
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
             preparedStatement.setString(1, channelName);
             preparedStatement.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("ChannelRepository - Method deleteChannel: ");
+            System.out.println(e);
         }
         return false;
     }

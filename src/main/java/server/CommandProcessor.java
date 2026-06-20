@@ -15,51 +15,60 @@ public class CommandProcessor {
         this.client = client;
     }
 
-    public void handleCommand(String command) throws IOException, SQLException {
-        String[] args = command.split(" ");
-        switch (args[0]){
-            case "/quit": { client.closeClient(); break; }
-
-            case "/users":{
-                client.sendMessage(UNDERLINE.code() + BOLD.code() + "Online Users:" + RESET.code());
-                ArrayList<String> clients = server.getAllClients();
-                for (String user : clients){
-                    if ( !client.username().equals(user) ) client.sendMessage(user);
+    public void handleCommand(String command) {
+        try {
+            String[] args = command.split(" ");
+            switch (args[0]) {
+                case "/quit": {
+                    client.closeClient();
+                    break;
                 }
-                client.sendMessage("\n");
-                break;
-            }
 
-            case "/create":{
-                server.addGroupChannel(args[1], client.username());
-                client.sendMessage(BOLD.code() + "You've created the channel \"" + args[1] + "\" use /join to enter" + RESET.code());
-                break;
-            }
+                case "/users": {
+                    client.sendMessage(UNDERLINE.code() + BOLD.code() + "Online Users:" + RESET.code());
+                    ArrayList<String> clients = server.getAllClients();
+                    for (String user : clients) {
+                        if (!client.username().equals(user)) client.sendMessage(user);
+                    }
+                    client.sendMessage("\n");
+                    break;
+                }
 
-            case "/join":{
-                server.joinNewChannel(client.username(), args[1]);
-                break;
-            }
+                case "/create": {
+                    server.addGroupChannel(args[1], client.username());
+                    client.sendMessage(BOLD.code() + "You've created the channel \"" + args[1] + "\" use /join to enter" + RESET.code());
+                    break;
+                }
 
-            case "/delete":{
-                server.deleteChannel(args[1], client.username());
-                break;
-            }
+                case "/join": {
+                    server.joinNewChannel(client.username(), args[1]);
+                    break;
+                }
 
-            case "/rooms": {
-                client.sendMessage(UNDERLINE.code() + BOLD.code() + "Available Rooms:" + RESET.code());
-                ArrayList<String> channels = server.getAllGroupChannels(client.username());
-                for (String channel: channels){ client.sendMessage(channel); }
-                client.sendMessage("\n");
-                break;
-            }
+                case "/delete": {
+                    server.deleteChannel(args[1], client.username());
+                    break;
+                }
 
-            default:
-            {
-                command = command.replace("/", "");
-                server.privateMessage(command, client.username());
-            }
+                case "/rooms": {
+                    client.sendMessage(UNDERLINE.code() + BOLD.code() + "Available Rooms:" + RESET.code());
+                    ArrayList<String> channels = server.getAllGroupChannels(client.username());
+                    for (String channel : channels) {
+                        client.sendMessage(channel);
+                    }
+                    client.sendMessage("\n");
+                    break;
+                }
 
+                default: {
+                    command = command.replace("/", "");
+                    server.privateMessage(command, client.username());
+                }
+
+            }
+        } catch (SQLException e) {
+            System.out.println("CommandProcessor - Method handleCommand: ");
+            System.out.println(e);
         }
     }
 }

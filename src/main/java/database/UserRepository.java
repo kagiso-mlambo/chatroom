@@ -13,7 +13,7 @@ public class UserRepository {
         this.connection = connection;
     }
 
-    public String logIn(String[] userCredentials) throws SQLException {
+    public String logIn(String[] userCredentials) {
         String query = "SELECT password_hash FROM users WHERE username = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
             pstmt.setString(1, userCredentials[1]);
@@ -26,11 +26,14 @@ public class UserRepository {
                     return "Password was entered incorrectly. If you don't have an account please sign up.";
                 }
             }
+        } catch (SQLException e) {
+            System.out.println("UserRepository - Method logIn: ");
+            System.out.println(e);
         }
         return "Logged in successfully";
     }
 
-    public String signUp(String[] userCredentials) throws SQLException {
+    public String signUp(String[] userCredentials) {
         String query =  "INSERT INTO users (username, password_hash) VALUES (?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
             pstmt.setString(1, userCredentials[1]);
@@ -40,12 +43,13 @@ public class UserRepository {
             if (e.getMessage().contains("UNIQUE constraint failed")) {
                 return "That username is already taken, please choose another.";
             }
-            throw e;
+                System.out.println("UserRepository - Method signUp: ");
+                System.out.println(e);
         }
         return "Sign up successful!";
     }
 
-    public boolean checkIfUserExists(String username) throws SQLException{
+    public boolean checkIfUserExists(String username) {
         String query = "SELECT * FROM users WHERE username = ?";
 
         try(PreparedStatement preparedStatement = connection.prepareStatement(query)){
@@ -54,33 +58,42 @@ public class UserRepository {
             if (result.next()){
                 return true;
             }
+        } catch (SQLException e) {
+            System.out.println("UserRepository - Method checkIfUserExists: ");
+            System.out.println(e);
         }
         return false;
     }
 
-    public int getUserId(String username) throws SQLException{
-        String query = "SELECT user_id FROM users WHERE username = ?";
+    public int getUserId(String username) {
+        String query = "SELECT id FROM users WHERE username = ?";
         int id = -1;
 
         try(PreparedStatement preparedStatement = connection.prepareStatement(query)){
             preparedStatement.setString(1, username);
             ResultSet result = preparedStatement.executeQuery();
             if (result.next()){
-                id = result.getInt("user_id");
+                id = result.getInt("id");
             }
+        } catch (SQLException e) {
+            System.out.println("UserRepository - Method getUserId: ");
+            System.out.println(e);
         }
         return id;
     }
 
-    public ArrayList<String> getAllUsers() throws SQLException{
+    public ArrayList<String> getAllUsers() {
         ArrayList<String> users = new ArrayList<>();
         String query = "SELECT username FROM users";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
             ResultSet results = preparedStatement.executeQuery();
             while (results.next()){
-                users.add(results.getString("name"));
+                users.add(results.getString("username"));
             }
+        } catch (SQLException e) {
+            System.out.println("UserRepository - Method getAllUsers: ");
+            System.out.println(e);
         }
         return users;
     }
