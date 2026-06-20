@@ -1,6 +1,5 @@
 package server;
 
-import client.Client;
 import database.*;
 
 import java.net.*;
@@ -8,7 +7,6 @@ import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 
 import static common.ANSICodes.*;
@@ -83,7 +81,7 @@ public class Server {
     public ArrayList<String> getAllGroupChannels(String username) {
         int userID = -1;
         userID = userRepo.getUserId(username);
-        return channelRepo.getUsersChannels(userID);
+        return channelRepo.getChannels(userID);
     }
 
     public synchronized void joinNewChannel(String username, String channelName) {

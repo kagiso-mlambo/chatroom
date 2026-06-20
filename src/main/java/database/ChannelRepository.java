@@ -74,23 +74,14 @@ public class ChannelRepository {
         }
     }
 
-    public ArrayList<String> getUsersChannels(int userID) {
+    public ArrayList<String> getChannels(int userID) {
         ArrayList<String> channels =  new ArrayList<>();
-        String channelMemberQuery = "SELECT channel_id FROM channel_members WHERE user_id = ?";
-        String channelQuery = "SELECT name FROM channels WHERE channel_id = ? AND type = ?";
+        String channelQuery = "SELECT name FROM channels WHERE type = ?";
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(channelMemberQuery)){
-            preparedStatement.setInt(1, userID);
-            ResultSet results = preparedStatement.executeQuery();
-
-            while (results.next()){
-                try(PreparedStatement pstmt = connection.prepareStatement(channelQuery)){
-                    pstmt.setInt(1, results.getInt("channel_id"));
-                    pstmt.setString(2, "group");
-                    ResultSet channelresults = pstmt.executeQuery();
-                    while (channelresults.next()){ channels.add(channelresults.getString("name")); }
-                }
-            }
+        try(PreparedStatement pstmt = connection.prepareStatement(channelQuery)){
+            pstmt.setString(1, "group");
+            ResultSet channelresults = pstmt.executeQuery();
+            while (channelresults.next()){ channels.add(channelresults.getString("name")); }
         } catch (SQLException e){
             System.out.println("ChannelRepository - Method getUserChannels: ");
             System.out.println(e);
