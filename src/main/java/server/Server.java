@@ -62,10 +62,10 @@ public class Server {
     }
 
 
-    public void deleteChannel(String channelName, String username){
-        if (channels.containsKey(channelName) && (channels.get(channelName).creator().equals(username))){
-            channels.remove(channelName);
-        }
+    public void deleteChannel(String channelName, String username) throws SQLException{
+        boolean deleted = channelRepo.deleteChannel(channelName);
+        if (deleted) clients.get(username).sendMessage("Channel successfully deleted");
+        else clients.get(username).sendMessage("Could not delete channel");
     }
 
 
@@ -129,7 +129,6 @@ public class Server {
 
         while(true) {
             Socket clientSocket = severSocket.accept();
-//            Channel general = server.getAChannel("general");
             ClientHandler clientHandler = new ClientHandler(server, clientSocket);
             new Thread(clientHandler).start();
 

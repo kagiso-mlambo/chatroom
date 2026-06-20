@@ -95,4 +95,17 @@ public class ChannelRepository {
             preparedStatement.executeUpdate();
         }
     }
+
+    public boolean deleteChannel(String channelName) throws SQLException{
+        String query = "DELETE * from channels WHERE name = ?";
+        int channelID = getChannelID(channelName);
+
+        channelMembersRepo.removeAllChannelMembers(channelID);
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
+            preparedStatement.setString(1, channelName);
+            preparedStatement.executeQuery();
+        }
+        return false;
+    }
 }
