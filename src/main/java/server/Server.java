@@ -82,19 +82,19 @@ public class Server {
         return usersChannels;
     }
 
-    public synchronized void joinNewChannel(String username, String channelName){
-//        Channel channel = channels.get(channelName);
-//        ClientHandler member = clients.get(username);
-//
-//        channel.addMembers(member);
-//        member.updateChannel(channel);
-//        member.sendMessage("You are now in " + channelName);
-//
-//        String joinNotificationMessage = BOLD.code() + "\n" + "------------------------------" +
-//                "Server: " + username + " has joined the " + channelName +
-//                "------------------------------" + "\n" + RESET.code();
-//
-//        broadcastAll(joinNotificationMessage, username, channel);
+    public synchronized void joinNewChannel(String username, String channelName) throws SQLException{
+        String joinNotificationMessage = BOLD.code() + "\n" + "------------------------------" +
+                "Server: " + username + " has joined the " + channelName +
+                "------------------------------" + "\n" + RESET.code();
+
+        int channelID = channelRepo.getChannelID(channelName);
+
+        if (channelID > 0) {
+            int userID = userRepo.getUserId(username);
+            channelMembersRepo.addMemberToChannel(channelID, userID);
+            clients.get(username).updateChannel(channelName);
+            broadcastAll(joinNotificationMessage, username, channelName);
+        }
     }
 
 

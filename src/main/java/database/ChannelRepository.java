@@ -17,6 +17,18 @@ public class ChannelRepository {
         this.userRepo = userRepo;
     }
 
+    public int getChannelID(String channelName) throws SQLException{
+        int channelID = -1;
+        String query = "SELECT channel_id FROM channels WHERE name = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
+            preparedStatement.setString(1, channelName);
+            ResultSet results = preparedStatement.executeQuery();
+            if (results.next()) channelID = results.getInt("channel_id");
+        }
+        return channelID;
+    }
+
     public int PrivateChannel(String channelName, String sender, String receiver) throws SQLException {
         String selectQuery = "SELECT id FROM channel WHERE name = ?";
         int channelID;
