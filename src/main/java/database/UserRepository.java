@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class UserRepository {
     private final Connection connection;
@@ -69,5 +70,18 @@ public class UserRepository {
             }
         }
         return id;
+    }
+
+    public ArrayList<String> getAllUsers() throws SQLException{
+        ArrayList<String> users = new ArrayList<>();
+        String query = "SELECT username FROM users";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
+            ResultSet results = preparedStatement.executeQuery();
+            while (results.next()){
+                users.add(results.getString("name"));
+            }
+        }
+        return users;
     }
 }

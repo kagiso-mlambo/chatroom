@@ -66,7 +66,8 @@ public class ClientHandler implements  Runnable{
 
                 String response;
                 if (user_credentials[0].equals("login")) response = server.logIn(user_credentials);
-                else response = server.signUp(user_credentials);
+                else if (user_credentials[0].equals("signup")) response = server.signUp(user_credentials);
+                else response = "Invalid choice input please enter 1 or 2";
 
                 printWriter.println(response);
 

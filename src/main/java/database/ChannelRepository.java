@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class ChannelRepository {
     private Connection connection;
@@ -16,7 +17,7 @@ public class ChannelRepository {
         this.userRepo = userRepo;
     }
 
-    public int getChannelId(String channelName, String type, String sender, String receiver) throws SQLException {
+    public int PrivateChannel(String channelName, String sender, String receiver) throws SQLException {
         String selectQuery = "SELECT id FROM channel WHERE name = ?";
         int channelID;
         int userID;
@@ -27,9 +28,9 @@ public class ChannelRepository {
 
             if (result.next()){ channelID = result.getInt("id"); }
             else{
-                insertNewChannel(channelName, type);
+                insertNewChannel(channelName);
 
-                channelID = getChannelId(channelName, type, sender, receiver);
+                channelID = PrivateChannel(channelName, sender, receiver);
                 int senderUserID = userRepo.getUserId(sender);
                 int receiverUserID = userRepo.getUserId(receiver);
 
@@ -43,12 +44,42 @@ public class ChannelRepository {
         return channelID;
     }
 
-    private void insertNewChannel(String channelName, String type) throws SQLException{
-        String insertQuery = "INSERT INTO channel (name, type) VALUES (?, ?)";
+    private void insertNewChannel(String channelName) throws SQLException{
+        String insertQuery = "INSERT INTO channels (name, type) VALUES (?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)){
             preparedStatement.setString(1, channelName);
-            preparedStatement.setString(2, type);
+            preparedStatement.setString(2, "private");
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    public ArrayList<String> getUsersChannels(int userID) throws SQLException {
+        ArrayList<String> channels =  new ArrayList<>();
+        String channelMemberQuery = "SELECT channel_id FROM channel_members WHERE user_id = ?";
+        String channelQuery = "SELECT name FROM channels WHERE channel_id = ? AND type = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(channelMemberQuery)){
+            preparedStatement.setInt(1, userID);
+            ResultSet results = preparedStatement.executeQuery();
+
+            while (results.next()){
+                try(PreparedStatement pstmt = connection.prepareStatement(channelQuery)){
+                    pstmt.setInt(1, results.getInt("channel_id"));
+                    pstmt.setString(2, "private");
+                    while (results.next()){ channels.add(results.getString("name")); }
+                }
+            }
+        }
+        return channels;
+    }
+
+    public void createGroupChannel(String channelName, String creator) throws SQLException{
+        String query = "INSERT INTO channels (name, type) VALUES (?, ?)";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
+            preparedStatement.setString(1, channelName);
+            preparedStatement.setString(2, "group");
             preparedStatement.executeUpdate();
         }
     }

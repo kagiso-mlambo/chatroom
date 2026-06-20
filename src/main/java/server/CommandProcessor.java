@@ -2,6 +2,7 @@ package server;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import static common.ANSICodes.*;
 
@@ -21,15 +22,16 @@ public class CommandProcessor {
 
             case "/users":{
                 client.sendMessage(UNDERLINE.code() + BOLD.code() + "Online Users:" + RESET.code());
-                for (ClientHandler c: server.getAllClients()){
-                    if ( !client.username().equals(c.username()) ) client.sendMessage(c.username());
+                ArrayList<String> clients = server.getAllClients();
+                for (String user : clients){
+                    if ( !client.username().equals(user) ) client.sendMessage(user);
                 }
                 client.sendMessage("\n");
                 break;
             }
 
             case "/create":{
-                server.addChannel(args[1], client.username());
+                server.addGroupChannel(args[1], client.username());
                 client.sendMessage(BOLD.code() + "You've created the channel \"" + args[1] + "\" use /join to enter" + RESET.code());
                 break;
             }
@@ -46,7 +48,8 @@ public class CommandProcessor {
 
             case "/rooms": {
                 client.sendMessage(UNDERLINE.code() + BOLD.code() + "Available Rooms:" + RESET.code());
-                for (Channel channel: server.getAllChats()){ client.sendMessage(channel.name()); }
+                ArrayList<String> channels = server.getAllGroupChannels(client.username());
+                for (String channel: channels){ client.sendMessage(channel); }
                 client.sendMessage("\n");
                 break;
             }

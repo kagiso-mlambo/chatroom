@@ -52,13 +52,13 @@ public class Server {
         clients.remove(clientName);
     }
 
-    public Collection<ClientHandler> getAllClients(){
-        return clients.values();
+    public ArrayList<String> getAllClients() throws SQLException{
+        return userRepo.getAllUsers();
     }
 
 
-    public void addChannel(String channelName, String creator){
-        channels.put(channelName, new Channel(channelName, creator));
+    public void addGroupChannel(String channelName, String creator) throws SQLException{
+        channelRepo.createGroupChannel(channelName, creator);
     }
 
 
@@ -74,13 +74,12 @@ public class Server {
     }
 
 
-    public ArrayList<String> getAllChats(){
+    public ArrayList<String> getAllGroupChannels(String username) throws SQLException{
         ArrayList<String> usersChannels = new ArrayList<>();
-        //Get users id
-        // Get all group channels user is a member of
-        // return an Arraylist of the names
+        int userID = userRepo.getUserId(username);
+        usersChannels = channelRepo.getUsersChannels(userID);
 
-        return new ArrayList<>();
+        return usersChannels;
     }
 
     public synchronized void joinNewChannel(String username, String channelName){
@@ -105,7 +104,8 @@ public class Server {
             if (sender.compareTo(receiver) <= 0) { channel = sender + "_" + receiver; }
             else { channel = receiver + "_" + sender; }
 
-            int channelID = channelRepo.getChannelId(channel, "private", sender, receiver);
+            channelRepo.PrivateChannel(channel, sender, receiver);
+
             clients.get(sender).updateChannel(channel);
             clients.get(sender).sendMessage("Private Message with " + receiver);
         } else {clients.get(sender).sendMessage("This user does not exist!");}
