@@ -15,7 +15,7 @@ public class DatabaseInitialiser {
 
             stmt.execute("CREATE TABLE IF NOT EXISTS channels (\n" +
                     "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
-                    "    name TEXT,\n" +
+                    "    name TEXT UNIQUE NOT NULL,\n" +
                     "    type TEXT NOT NULL,\n" +
                     "    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n" +
                     ")");

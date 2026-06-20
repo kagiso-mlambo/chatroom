@@ -19,12 +19,12 @@ public class ChannelRepository {
 
     public int getChannelID(String channelName){
         int channelID = -1;
-        String query = "SELECT channel_id FROM channels WHERE name = ?";
+        String query = "SELECT id FROM channels WHERE name = ?";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
             preparedStatement.setString(1, channelName);
             ResultSet results = preparedStatement.executeQuery();
-            if (results.next()) channelID = results.getInt("channel_id");
+            if (results.next()) channelID = results.getInt("id");
         } catch (SQLException e) {
             System.out.println("ChannelRepository - Method getChannelID: ");
             System.out.println(e);
@@ -34,7 +34,7 @@ public class ChannelRepository {
     }
 
     public int privateChannel(String channelName, String sender, String receiver) {
-        String selectQuery = "SELECT id FROM channel WHERE name = ?";
+        String selectQuery = "SELECT id FROM channels WHERE name = ?";
         int channelID = -1;
         int userID;
 
@@ -86,7 +86,7 @@ public class ChannelRepository {
             while (results.next()){
                 try(PreparedStatement pstmt = connection.prepareStatement(channelQuery)){
                     pstmt.setInt(1, results.getInt("channel_id"));
-                    pstmt.setString(2, "private");
+                    pstmt.setString(2, "group");
                     ResultSet channelresults = pstmt.executeQuery();
                     while (channelresults.next()){ channels.add(channelresults.getString("name")); }
                 }
@@ -104,7 +104,7 @@ public class ChannelRepository {
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
             preparedStatement.setString(1, channelName);
             preparedStatement.setString(2, "group");
-            preparedStatement.executeQuery();
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.out.println("ChannelRepository - Method createGroupChannel: ");
             System.out.println(e);
@@ -112,14 +112,14 @@ public class ChannelRepository {
     }
 
     public boolean deleteChannel(String channelName) throws SQLException{
-        String query = "DELETE * from channels WHERE name = ?";
+        String query = "DELETE FROM channels WHERE name = ?";
         int channelID = getChannelID(channelName);
 
         channelMembersRepo.removeAllChannelMembers(channelID);
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
             preparedStatement.setString(1, channelName);
-            preparedStatement.executeQuery();
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.out.println("ChannelRepository - Method deleteChannel: ");
             System.out.println(e);

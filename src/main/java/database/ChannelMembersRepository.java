@@ -26,11 +26,11 @@ public class ChannelMembersRepository {
     }
 
     public void removeAllChannelMembers(int channelID) {
-        String query = "DELETE * FROM channel_members WHERE channel_id = ?";
+        String query = "DELETE FROM channel_members WHERE channel_id = ?";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
             preparedStatement.setInt(1, channelID);
-            preparedStatement.executeQuery();
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.out.println("ChannelMemberRepository - removeALLChannelMembers: ");
             System.out.println(e);

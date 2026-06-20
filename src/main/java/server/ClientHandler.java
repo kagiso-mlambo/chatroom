@@ -95,8 +95,6 @@ public class ClientHandler implements  Runnable{
 
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
-            request = bufferedReader.readLine();
-
             while ((request = bufferedReader.readLine()) != null){
 
                 if (!request.startsWith("/")) {

@@ -35,7 +35,9 @@ public class CommandProcessor {
                 }
 
                 case "/create": {
+                    System.out.println("In create case in switch statement");
                     server.addGroupChannel(args[1], client.username());
+                    System.out.println("Right after adding channel");
                     client.sendMessage(BOLD.code() + "You've created the channel \"" + args[1] + "\" use /join to enter" + RESET.code());
                     break;
                 }

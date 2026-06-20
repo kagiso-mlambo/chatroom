@@ -57,6 +57,9 @@ public class Server {
 
     public void addGroupChannel(String channelName, String creator){
         channelRepo.createGroupChannel(channelName, creator);
+        int channelID = channelRepo.getChannelID(channelName);
+        int userID = userRepo.getUserId(creator);
+        channelMembersRepo.addMemberToChannel(channelID, userID);
     }
 
 
