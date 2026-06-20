@@ -3,7 +3,9 @@ package database;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class ChannelMembersRepository {
     private Connection connection;
@@ -35,6 +37,22 @@ public class ChannelMembersRepository {
             System.out.println("ChannelMemberRepository - removeALLChannelMembers: ");
             System.out.println(e);
         }
+    }
+
+    public ArrayList<String> getAllMembers(int channelID, UserRepository userRepo){
+        ArrayList <String> members = new ArrayList<>();
+        String userIDQuery = "SELECT user_id FROM channel_members WHERE channel_id = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(userIDQuery)){
+            preparedStatement.setInt(1, channelID);
+            ResultSet results = preparedStatement.executeQuery();
+            while (results.next()){ members.add(userRepo.getAUser(results.getInt("user_id"))); }
+
+        }catch (SQLException e) {
+            System.out.println("ChannelMemberRepository - getAllMembers: ");
+            System.out.println(e);
+        }
+        return members;
     }
 
 }

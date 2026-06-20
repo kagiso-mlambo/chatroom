@@ -17,6 +17,7 @@ public class Server {
     private UserRepository userRepo;
     private ChannelRepository channelRepo;
     private ChannelMembersRepository channelMembersRepo;
+    private  MessagesRepository messagesRepo;
 
 
 
@@ -28,6 +29,7 @@ public class Server {
         userRepo = new UserRepository(connection);
         channelMembersRepo = new ChannelMembersRepository(connection);
         channelRepo = new ChannelRepository(connection, channelMembersRepo, userRepo);
+        messagesRepo = new MessagesRepository(connection);
     }
 
     public String logIn(String[] userCredentials) {
@@ -120,14 +122,25 @@ public class Server {
 
 
     public synchronized void broadcastAll(String message, String username, String channel){
-//        ArrayList<ClientHandler> members = channel.members();
-//         for (ClientHandler client: members){
-//                if (!client.username().equals(username)) {
-//                    String newMessage = " ".repeat(50) + message;
-//                    client.sendMessage(newMessage);
-//                }else { client.sendMessage(message); }
-//         }
-        clients.get(username).sendMessage("STILL NEED TO IMPLEMENT BROADCASTING!!!");
+        int channelID = channelRepo.getChannelID(channel);
+        int userID =  userRepo.getUserId(username);
+
+        messagesRepo.addMessage(channelID, userID, message);
+
+        ArrayList<String> members = channelMembersRepo.getAllMembers(channelID, userRepo);
+
+
+        for(String member : members){
+            if (clients.containsKey(member)) {
+                ClientHandler client = clients.get(member);
+                if (!client.username().equals(username)) {
+                    String newMessage = " ".repeat(50) + message;
+                    client.sendMessage(newMessage);
+                }
+            }
+        }
+
+        clients.get(username).sendMessage(message);
     }
 
 

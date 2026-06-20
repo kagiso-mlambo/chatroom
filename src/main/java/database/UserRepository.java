@@ -97,4 +97,19 @@ public class UserRepository {
         }
         return users;
     }
+
+    public String getAUser(int userID){
+        String query = "SELECT username FROM users WHERE id = ?";
+        String username = "";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
+            preparedStatement.setInt(1, userID);
+            ResultSet results = preparedStatement.executeQuery();
+            if (results.next()){username = results.getString("username"); }
+        } catch (SQLException e) {
+            System.out.println("UserRepository - Method getAUsers: ");
+            System.out.println(e);
+        }
+        return username;
+    }
 }

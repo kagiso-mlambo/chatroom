@@ -28,15 +28,15 @@ public class DatabaseInitialiser {
                     "    FOREIGN KEY (user_id) REFERENCES users(id)\n" +
                     ")");
 
-//            stmt.execute("CREATE TABLE IF NOT EXISTS messages (\n" +
-//                    "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
-//                    "    channel_id INTEGER NOT NULL,\n" +
-//                    "    user_id INTEGER NOT NULL,\n" +
-//                    "    content TEXT NOT NULL,\n" +
-//                    "    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n" +
-//                    "    FOREIGN KEY (channel_id) REFERENCES channels(id),\n" +
-//                    "    FOREIGN KEY (user_id) REFERENCES users(id)\n" +
-//                    ")");
+            stmt.execute("CREATE TABLE IF NOT EXISTS messages (\n" +
+                    "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                    "    channel_id INTEGER NOT NULL,\n" +
+                    "    user_id INTEGER NOT NULL,\n" +
+                    "    content TEXT NOT NULL,\n" +
+                    "    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n" +
+                    "    FOREIGN KEY (channel_id) REFERENCES channels(id),\n" +
+                    "    FOREIGN KEY (user_id) REFERENCES users(id)\n" +
+                    ")");
         }
     }
 }
