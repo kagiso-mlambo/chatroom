@@ -114,7 +114,8 @@ public class ChannelRepository {
         } catch (SQLException e) {
             System.out.println("ChannelRepository - Method deleteChannel: ");
             System.out.println(e);
+            return false;
         }
-        return false;
+        return true;
     }
 }
