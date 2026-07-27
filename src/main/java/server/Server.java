@@ -91,12 +91,10 @@ public class Server {
 
     public void displayPreviousMessages(int channelID, String username){
         Multimap<Integer, String> messages = messagesRepo.getLastMessages(channelID);
-        List<Map.Entry<Integer, String>> entries = new ArrayList<>(messages.entries());
-        Collections.reverse(entries);
         System.out.println("Previous Messages" + messages);
         ClientHandler client = clients.get(username);
         int userID = userRepo.getUserId(username);
-        for (Map.Entry<Integer, String> message : entries){
+        for (Map.Entry<Integer, String> message : messages.entries()){
             if (!message.getKey().equals(userID)) {
                 String newMessage = " ".repeat(50) + message.getValue();
                 client.sendMessage(newMessage);
@@ -107,7 +105,7 @@ public class Server {
 
     public synchronized void joinNewChannel(String username, String channelName) {
         String joinNotificationMessage = BOLD.code() + "\n" + "------------------------------" +
-                "Server: " + username + " has joined the " + channelName +
+                "Server: " + username + " has joined " + channelName +
                 "------------------------------" + "\n" + RESET.code();
 
         int channelID = channelRepo.getChannelID(channelName);
@@ -135,6 +133,8 @@ public class Server {
 
             clients.get(sender).updateChannel(channel);
             clients.get(sender).sendMessage("Private Message with " + receiver);
+            int channelId = channelRepo.getChannelID(channel);
+            displayPreviousMessages(channelId, sender);
         } else {
             clients.get(sender).sendMessage("This user does not exist!");
         }
@@ -163,7 +163,7 @@ public class Server {
                 }
             }
         }
-//        clients.get(username).sendMessage(message);
+        clients.get(username).sendMessage(message);
     }
 
 
