@@ -53,7 +53,7 @@ public class Client {
                 request = scanner.nextLine();
                 writer.println(request);
                 System.out.print("\033[1A\033[2K");
-                if (request.equalsIgnoreCase("quit")) {
+                if (request.equalsIgnoreCase("/quit")) {
                     System.exit(0);
                 }
             }
