@@ -1,14 +1,13 @@
 package server;
 
+import com.google.common.collect.Multimap;
 import database.*;
 
 import java.net.*;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static common.ANSICodes.*;
 
@@ -19,7 +18,6 @@ public class Server {
     private ChannelRepository channelRepo;
     private ChannelMembersRepository channelMembersRepo;
     private  MessagesRepository messagesRepo;
-
 
 
     public Server() throws SQLException {
@@ -33,9 +31,11 @@ public class Server {
         messagesRepo = new MessagesRepository(connection);
     }
 
+
     public String logIn(String[] userCredentials) {
         return userRepo.logIn(userCredentials);
     }
+
 
     public String signUp(String[] userCredentials) {
         return userRepo.signUp(userCredentials);
@@ -50,6 +50,7 @@ public class Server {
     public void removeClient(String clientName){
         clients.remove(clientName);
     }
+
 
     public ArrayList<String> getAllClients() throws SQLException{
         return userRepo.getAllUsers();
@@ -89,11 +90,13 @@ public class Server {
 
 
     public void displayPreviousMessages(int channelID, String username){
-        Map<Integer, String> messages = messagesRepo.getLastMessages(channelID);
+        Multimap<Integer, String> messages = messagesRepo.getLastMessages(channelID);
+        List<Map.Entry<Integer, String>> entries = new ArrayList<>(messages.entries());
+        Collections.reverse(entries);
         System.out.println("Previous Messages" + messages);
         ClientHandler client = clients.get(username);
         int userID = userRepo.getUserId(username);
-        for (Map.Entry<Integer, String> message : messages.entrySet()){
+        for (Map.Entry<Integer, String> message : entries){
             if (!message.getKey().equals(userID)) {
                 String newMessage = " ".repeat(50) + message.getValue();
                 client.sendMessage(newMessage);
@@ -139,6 +142,10 @@ public class Server {
 
 
     public synchronized void broadcastAll(String message, String username, String channel){
+        if (channel == null){
+            System.out.println("Enter a chat to send a message");
+            return;
+        }
         int channelID = channelRepo.getChannelID(channel);
         int userID =  userRepo.getUserId(username);
 
@@ -156,8 +163,7 @@ public class Server {
                 }
             }
         }
-
-        clients.get(username).sendMessage(message);
+//        clients.get(username).sendMessage(message);
     }
 
 
