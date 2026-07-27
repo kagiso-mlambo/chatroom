@@ -1,13 +1,12 @@
 package database;
 
-import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
 
 public class MessagesRepository {
     private Connection connection;
@@ -32,8 +31,8 @@ public class MessagesRepository {
     }
 
     public Multimap<Integer, String> getLastMessages(int channelId){
-        Multimap<Integer, String> lastMessages = ArrayListMultimap.create();
-        String query = "SELECT * FROM messages WHERE channel_id = ? ORDER BY sent_at DESC LIMIT 20";
+        Multimap<Integer, String> lastMessages = LinkedListMultimap.create();
+        String query = "SELECT * FROM messages WHERE channel_id = ? ORDER BY sent_at ASC LIMIT 20";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
             preparedStatement.setInt(1, channelId);
