@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import static common.ANSICodes.*;
 
@@ -86,6 +87,21 @@ public class Server {
         return channelRepo.getChannels(userID);
     }
 
+
+    public void displayPreviousMessages(int channelID, String username){
+        Map<Integer, String> messages = messagesRepo.getLastMessages(channelID);
+        System.out.println("Previous Messages" + messages);
+        ClientHandler client = clients.get(username);
+        int userID = userRepo.getUserId(username);
+        for (Map.Entry<Integer, String> message : messages.entrySet()){
+            if (!message.getKey().equals(userID)) {
+                String newMessage = " ".repeat(50) + message.getValue();
+                client.sendMessage(newMessage);
+            } else { client.sendMessage(message.getValue()); }
+        }
+    }
+
+
     public synchronized void joinNewChannel(String username, String channelName) {
         String joinNotificationMessage = BOLD.code() + "\n" + "------------------------------" +
                 "Server: " + username + " has joined the " + channelName +
@@ -97,6 +113,7 @@ public class Server {
             int userID = userRepo.getUserId(username);
             channelMembersRepo.addMemberToChannel(channelID, userID);
             clients.get(username).updateChannel(channelName);
+            displayPreviousMessages(channelID, username);
             broadcastAll(joinNotificationMessage, username, channelName);
         }
     }
