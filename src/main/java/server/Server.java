@@ -77,11 +77,6 @@ public class Server {
     }
 
 
-    public Channel getAChannel(String channelName){
-        return channels.get(channelName);
-    }
-
-
     public ArrayList<String> getAllGroupChannels(String username) {
         int userID = -1;
         userID = userRepo.getUserId(username);
