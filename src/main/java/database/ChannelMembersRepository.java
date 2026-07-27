@@ -15,6 +15,16 @@ public class ChannelMembersRepository {
     }
 
     public void addMemberToChannel(int channelId, int userId) {
+        String userIDQuery = "SELECT user_id FROM channel_members WHERE user_id = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(userIDQuery)){
+            preparedStatement.setInt(1, userId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()){ return; }
+        } catch (SQLException e) {
+            System.out.println("ChannelMemberRepository - Method addMemberToChannel: ");
+            System.out.println(e);
+        }
+
         String query = "INSERT INTO channel_members (channel_id, user_id) VALUES (?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
