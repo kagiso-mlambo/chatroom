@@ -2,9 +2,16 @@ package server;
 
 import com.google.common.collect.Multimap;
 import database.*;
+import org.checkerframework.checker.units.qual.K;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 import java.net.*;
 import java.io.*;
+import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
@@ -167,10 +174,25 @@ public class Server {
         clients.get(username).sendMessage(message);
     }
 
+    private static ServerSocket createServerSocket(int port) throws Exception{
+      char[] password = "daWorld09".toCharArray();
+      KeyStore keyStore = KeyStore.getInstance("PKCS12");
+      keyStore.load(new FileInputStream("server.keystore.p12"), password);
 
-    public static void main(String[] args) throws IOException, SQLException {
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        kmf.init(keyStore, password);
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(kmf.getKeyManagers(), null, new SecureRandom());
+
+        SSLServerSocketFactory factory = sslContext.getServerSocketFactory();
+        return (SSLServerSocket) factory.createServerSocket(port);
+    }
+
+
+    public static void main(String[] args) throws Exception {
         Server server = new Server();
-        ServerSocket severSocket = new ServerSocket(8081);
+        ServerSocket severSocket = createServerSocket(8081);
 
         while(true) {
             Socket clientSocket = severSocket.accept();
