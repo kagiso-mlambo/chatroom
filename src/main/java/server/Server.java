@@ -144,7 +144,13 @@ public class Server {
         int channelID = channelRepo.getChannelID(channel);
         int userID =  userRepo.getUserId(username);
 
-        messagesRepo.addMessage(channelID, userID, message);
+        String exitNotificationMessage = BOLD.code() + "------------------------------" +
+                "Server: " + username + " has left the chat!" +
+                "------------------------------" + RESET.code() + "\n";
+
+        if (!message.equals(exitNotificationMessage)) {
+            messagesRepo.addMessage(channelID, userID, message);
+        }
 
         ArrayList<String> members = channelMembersRepo.getAllMembers(channelID, userRepo);
 
