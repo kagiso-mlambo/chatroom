@@ -1,15 +1,36 @@
 package client;
 
-import java.net.*;
+import javax.net.ssl.*;
 import java.io.*;
+import java.security.KeyStore;
 import java.util.Scanner;
 
 public class Client {
-    public static void main(String[] args) {
+    private static SSLSocket createSocket(int serverPort) throws Exception{
+        // 1. Load the truststore file into a KeyStore object
+        KeyStore trustStore = KeyStore.getInstance("PKCS12");
+        try (FileInputStream fis = new FileInputStream("client-truststore.p12")) {
+            trustStore.load(fis, "daWorld09".toCharArray());
+        }
+
+        // 2. Create a TrustManagerFactory and initialize it with the truststore
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()); // usually "PKIX"
+        tmf.init(trustStore);
+
+        // 3. Build an SSLContext using those trust managers
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, tmf.getTrustManagers(), null);
+
+        SSLSocketFactory factory = sslContext.getSocketFactory();
+        return (SSLSocket) factory.createSocket("localhost", serverPort);
+    }
+    public static void main(String[] args) throws Exception {
         try {
             Scanner scanner = new Scanner(System.in);
             String request;
-            Socket clientSocket = new Socket("localhost", 8081);
+            SSLSocket clientSocket = createSocket(8081);
+            clientSocket.startHandshake();
+
             PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
@@ -58,6 +79,7 @@ public class Client {
                 }
             }
         } catch(Exception e) {
+            System.out.println(e.getMessage());
             System.out.println("The Server is currently unavailable");
         }
     }
