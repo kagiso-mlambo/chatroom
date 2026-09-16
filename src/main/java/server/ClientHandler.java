@@ -70,7 +70,8 @@ public class ClientHandler implements  Runnable{
             String request;
             String[] user_credentials = null;
 
-            while (true) {
+            int faliedLogins =0;
+            while (faliedLogins < 3) {
                 user_credentials = bufferedReader.readLine().split(" ");
                 user_credentials[0] = user_credentials[0].toLowerCase();
 
@@ -83,7 +84,12 @@ public class ClientHandler implements  Runnable{
 
                 if (response.equals("Logged in successfully") || response.equals("Sign up successful!")) {
                     break;
-                }
+                } else { faliedLogins++; }
+            }
+
+            if (faliedLogins == 3){
+                printWriter.println("Too many failed please try again later!");
+                clientSocket.close();
             }
 
             username = user_credentials[1];

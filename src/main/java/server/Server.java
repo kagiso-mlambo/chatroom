@@ -177,7 +177,12 @@ public class Server {
     private static ServerSocket createServerSocket(int port) throws Exception{
       char[] password = "daWorld09".toCharArray();
       KeyStore keyStore = KeyStore.getInstance("PKCS12");
-      keyStore.load(new FileInputStream("server.keystore.p12"), password);
+        try (InputStream ks = Server.class.getClassLoader().getResourceAsStream("server.keystore.p12")) {
+            if (ks == null) {
+                throw new FileNotFoundException("server.keystore.p12 not found on classpath");
+            }
+            keyStore.load(ks, password);
+        }
 
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         kmf.init(keyStore, password);

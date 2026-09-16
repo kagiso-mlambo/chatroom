@@ -9,7 +9,10 @@ public class Client {
     private static SSLSocket createSocket(int serverPort) throws Exception{
         // 1. Load the truststore file into a KeyStore object
         KeyStore trustStore = KeyStore.getInstance("PKCS12");
-        try (FileInputStream fis = new FileInputStream("client-truststore.p12")) {
+        try (InputStream fis = Client.class.getClassLoader().getResourceAsStream("client-truststore.p12")) {
+            if (fis == null) {
+                throw new FileNotFoundException("client-truststore.p12 not found on classpath");
+            }
             trustStore.load(fis, "daWorld09".toCharArray());
         }
 

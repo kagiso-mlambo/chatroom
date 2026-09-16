@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserRepository {
     private final Connection connection;
@@ -13,17 +14,27 @@ public class UserRepository {
         this.connection = connection;
     }
 
+    public String hashPassword(String password) {
+        int logRounds = 12;
+        String salt = BCrypt.gensalt(logRounds);
+        return BCrypt.hashpw(password, salt);
+    }
+
+    public boolean checkPassword(String password, String storedHash) {
+        return BCrypt.checkpw(password, storedHash);
+    }
+
     public String logIn(String[] userCredentials) {
         String query = "SELECT password_hash FROM users WHERE username = ?";
-        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-            pstmt.setString(1, userCredentials[1]);
-            try (ResultSet result = pstmt.executeQuery()) {
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, userCredentials[1]);
+            try (ResultSet result = stmt.executeQuery()) {
                 if (!result.next()) {
-                    return "Username was entered incorrectly!.";
+                    return "Username or password is incorrect!.\nIf you don't have an account please sign up.";
                 }
                 String storedPassword = result.getString("password_hash");
-                if (!userCredentials[2].equals(storedPassword)) {
-                    return "Password was entered incorrectly. If you don't have an account please sign up.";
+                if (!checkPassword(userCredentials[2], storedPassword)) {
+                    return "Username or password is incorrect!.\nIf you don't have an account please sign up.";
                 }
             }
         } catch (SQLException e) {
@@ -35,10 +46,14 @@ public class UserRepository {
 
     public String signUp(String[] userCredentials) {
         String query =  "INSERT INTO users (username, password_hash) VALUES (?, ?)";
-        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-            pstmt.setString(1, userCredentials[1]);
-            pstmt.setString(2, userCredentials[2]);
-            pstmt.executeUpdate();
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, userCredentials[1]);
+
+            String password = hashPassword(userCredentials[2]);
+            stmt.setString(2, password);
+
+            stmt.executeUpdate();
+
         } catch (SQLException e) {
             if (e.getMessage().contains("UNIQUE constraint failed")) {
                 return "That username is already taken, please choose another.";
