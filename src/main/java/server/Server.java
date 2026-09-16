@@ -177,9 +177,9 @@ public class Server {
     private static ServerSocket createServerSocket(int port) throws Exception{
       char[] password = "daWorld09".toCharArray();
       KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        try (InputStream ks = Server.class.getClassLoader().getResourceAsStream("server.keystore.p12")) {
+        try (InputStream ks = Server.class.getClassLoader().getResourceAsStream("server.p12")) {
             if (ks == null) {
-                throw new FileNotFoundException("server.keystore.p12 not found on classpath");
+                throw new FileNotFoundException("server.p12 not found on classpath");
             }
             keyStore.load(ks, password);
         }
