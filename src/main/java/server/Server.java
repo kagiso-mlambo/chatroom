@@ -76,7 +76,7 @@ public class Server {
 
     public void deleteChannel(String channelName, String username) {
         try {
-            boolean deleted = channelRepo.deleteChannel(channelName);
+            boolean deleted = channelRepo.deleteChannel(channelName, username);
             if (deleted) clients.get(username).sendMessage("Channel successfully deleted");
             else clients.get(username).sendMessage("Could not delete channel");
         } catch (SQLException e) {

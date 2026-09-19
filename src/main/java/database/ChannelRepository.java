@@ -78,10 +78,10 @@ public class ChannelRepository {
         ArrayList<String> channels =  new ArrayList<>();
         String channelQuery = "SELECT name FROM channels WHERE type = ?";
 
-        try(PreparedStatement pstmt = connection.prepareStatement(channelQuery)){
-            pstmt.setString(1, "group");
-            ResultSet channelresults = pstmt.executeQuery();
-            while (channelresults.next()){ channels.add(channelresults.getString("name")); }
+        try(PreparedStatement pStmt = connection.prepareStatement(channelQuery)){
+            pStmt.setString(1, "group");
+            ResultSet channelResults = pStmt.executeQuery();
+            while (channelResults.next()){ channels.add(channelResults.getString("name")); }
         } catch (SQLException e){
             System.out.println("ChannelRepository - Method getUserChannels: ");
             System.out.println(e);
@@ -90,11 +90,12 @@ public class ChannelRepository {
     }
 
     public void createGroupChannel(String channelName, String creator) {
-        String query = "INSERT INTO channels (name, type) VALUES (?, ?)";
+        String query = "INSERT INTO channels (name, type, creator) VALUES (?, ?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
             preparedStatement.setString(1, channelName);
             preparedStatement.setString(2, "group");
+            preparedStatement.setString(3, creator);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.out.println("ChannelRepository - Method createGroupChannel: ");
@@ -102,8 +103,27 @@ public class ChannelRepository {
         }
     }
 
-    public boolean deleteChannel(String channelName) throws SQLException{
+    private boolean checkCreator(String channelName, String username){
+        String query = "SELECT * FROM channels WHERE name = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)){
+            preparedStatement.setString(1, channelName);
+            ResultSet channelResults = preparedStatement.executeQuery();
+            while (channelResults.next()){
+                if (channelResults.getString("creator").equals(username)){ return true; }
+            }
+        } catch (SQLException e) {
+            System.out.print("ChannelRepository - Method deleteChannel: ");
+            System.out.println(e);
+        }
+        return false;
+    }
+
+    public boolean deleteChannel(String channelName, String username) throws SQLException{
+        if (!checkCreator(channelName, username)) {return false; };
+
         String query = "DELETE FROM channels WHERE name = ?";
+
         int channelID = getChannelID(channelName);
 
         channelMembersRepo.removeAllChannelMembers(channelID);

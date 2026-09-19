@@ -17,6 +17,7 @@ public class DatabaseInitialiser {
                     "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                     "    name TEXT UNIQUE NOT NULL,\n" +
                     "    type TEXT NOT NULL,\n" +
+                    "creator TEXT, \n" +
                     "    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n" +
                     ")");
 
