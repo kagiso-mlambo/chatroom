@@ -24,16 +24,16 @@ public class UserRepository {
         return BCrypt.checkpw(password, storedHash);
     }
 
-    public String logIn(String[] userCredentials) {
+    public String logIn(String user, String enteredPassword) {
         String query = "SELECT password_hash FROM users WHERE username = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, userCredentials[1]);
+            stmt.setString(1, user);
             try (ResultSet result = stmt.executeQuery()) {
                 if (!result.next()) {
                     return "Username or password is incorrect!.\nIf you don't have an account please sign up.";
                 }
                 String storedPassword = result.getString("password_hash");
-                if (!checkPassword(userCredentials[2], storedPassword)) {
+                if (!checkPassword(enteredPassword, storedPassword)) {
                     return "Username or password is incorrect!.\nIf you don't have an account please sign up.";
                 }
             }
@@ -44,12 +44,12 @@ public class UserRepository {
         return "Logged in successfully";
     }
 
-    public String signUp(String[] userCredentials) {
+    public String signUp(String user, String enteredPassword) {
         String query =  "INSERT INTO users (username, password_hash) VALUES (?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, userCredentials[1]);
+            stmt.setString(1, user);
 
-            String password = hashPassword(userCredentials[2]);
+            String password = hashPassword(enteredPassword);
             stmt.setString(2, password);
 
             stmt.executeUpdate();

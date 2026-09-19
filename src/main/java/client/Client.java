@@ -1,11 +1,16 @@
 package client;
 
+import common.Request;
+import common.Response;
+import org.json.JSONObject;
 import javax.net.ssl.*;
 import java.io.*;
 import java.security.KeyStore;
 import java.util.Scanner;
 
 public class Client {
+    private String sessionId = null;
+
     private static SSLSocket createSocket(int serverPort) throws Exception{
         // 1. Load the truststore file into a KeyStore object
         KeyStore trustStore = KeyStore.getInstance("PKCS12");
@@ -27,43 +32,63 @@ public class Client {
         SSLSocketFactory factory = sslContext.getSocketFactory();
         return (SSLSocket) factory.createSocket("localhost", serverPort);
     }
+
+    private Client(){}
+
+    public static void screenOutput(){
+        System.out.println("1. Log In");
+        System.out.println("2. Sign Up");
+        System.out.print("Enter the number corresponding with you choice: ");
+    }
+
+
     public static void main(String[] args) throws Exception {
+        Client client = new Client();
+
         try {
             Scanner scanner = new Scanner(System.in);
-            String request;
+            String data;
+            JSONObject response;
+            JSONObject request;
+
             SSLSocket clientSocket = createSocket(8081);
             clientSocket.startHandshake();
 
             PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
+
             while (true) {
-                System.out.println("1. Log In");
-                System.out.println("2. Sign Up");
-                System.out.print("Enter the number corresponding with you choice: ");
+                screenOutput();
+
                 String num = scanner.nextLine();
                 String action;
 
-                if (num.equals("1")) action = "LogIn";
-                else action = "SignUp";
+                if (num.equals("1")) action = "LogIn"; else action = "SignUp";
 
                 System.out.print("Enter your username: ");
                 String username = scanner.nextLine();
+
                 System.out.print("Enter your password: ");
                 String password = scanner.nextLine();
 
-                request = action + " " + username + " " + password;
+                data = action + " " + username + " " + password;
+                request = Request.formRequest(client.sessionId, data);
+
                 writer.println(request);
 
-                String response = null;
                 try {
-                    response = reader.readLine();
+                    response = new JSONObject(reader.readLine());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                System.out.println(response);
 
-                if (response.equals("Logged in successfully") || response.equals("Sign up successful!")) {
+                String message = Response.getData(response);
+                System.out.println(message);
+
+                if (message.equals("Logged in successfully") || message.equals("Sign up successful!")) {
+                    JSONObject sessionIdResponse = new JSONObject(reader.readLine());
+                    client.sessionId = Response.getData(sessionIdResponse);
                     break;
                 }
             }
@@ -74,10 +99,11 @@ public class Client {
 
 
             while (true) {
-                request = scanner.nextLine();
+                data = scanner.nextLine();
+                request = Request.formRequest(client.sessionId, data);
                 writer.println(request);
                 System.out.print("\033[1A\033[2K");
-                if (request.equalsIgnoreCase("/quit")) {
+                if (data.equalsIgnoreCase("/quit")) {
                     System.exit(0);
                 }
             }

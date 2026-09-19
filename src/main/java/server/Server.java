@@ -39,13 +39,13 @@ public class Server {
     }
 
 
-    public String logIn(String[] userCredentials) {
-        return userRepo.logIn(userCredentials);
+    public String logIn(String user, String password) {
+        return userRepo.logIn(user, password);
     }
 
 
-    public String signUp(String[] userCredentials) {
-        return userRepo.signUp(userCredentials);
+    public String signUp(String user, String password) {
+        return userRepo.signUp(user, password);
     }
 
 
