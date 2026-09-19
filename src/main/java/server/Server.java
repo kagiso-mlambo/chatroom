@@ -1,8 +1,10 @@
 package server;
 
 import com.google.common.collect.Multimap;
+import common.Response;
 import database.*;
 import org.checkerframework.checker.units.qual.K;
+import org.json.JSONObject;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -93,7 +95,6 @@ public class Server {
 
     public void displayPreviousMessages(int channelID, String username){
         Multimap<Integer, String> messages = messagesRepo.getLastMessages(channelID);
-        System.out.println("Previous Messages" + messages);
         ClientHandler client = clients.get(username);
         int userID = userRepo.getUserId(username);
         for (Map.Entry<Integer, String> message : messages.entries()){
@@ -106,9 +107,9 @@ public class Server {
 
 
     public synchronized void joinNewChannel(String username, String channelName) {
-        String joinNotificationMessage = BOLD.code() + "\n" + "------------------------------" +
-                "Server: " + username + " has joined " + channelName +
-                "------------------------------" + "\n" + RESET.code();
+        String gap = "                              ";
+        String joinNotificationMessage = BOLD.code() + "\n" + gap + "Server: " + username + " has joined " +
+                channelName + gap + "\n" + RESET.code();
 
         int channelID = channelRepo.getChannelID(channelName);
 
@@ -145,22 +146,16 @@ public class Server {
 
     public synchronized void broadcastAll(String message, String username, String channel){
         if (channel == null){
-            System.out.println("Enter a chat to send a message");
+            message = "Enter a chat to send a message";
+            clients.get(username).sendMessage(message);
             return;
         }
         int channelID = channelRepo.getChannelID(channel);
         int userID =  userRepo.getUserId(username);
 
-        String exitNotificationMessage = BOLD.code() + "------------------------------" +
-                "Server: " + username + " has left the chat!" +
-                "------------------------------" + RESET.code() + "\n";
-
-        if (!message.equals(exitNotificationMessage)) {
-            messagesRepo.addMessage(channelID, userID, message);
-        }
+        messagesRepo.addMessage(channelID, userID, message);
 
         ArrayList<String> members = channelMembersRepo.getAllMembers(channelID, userRepo);
-
 
         for(String member : members){
             if (clients.containsKey(member)) {
@@ -173,6 +168,7 @@ public class Server {
         }
         clients.get(username).sendMessage(message);
     }
+
 
     private static ServerSocket createServerSocket(int port) throws Exception{
       char[] password = "daWorld09".toCharArray();

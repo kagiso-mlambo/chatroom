@@ -25,7 +25,7 @@ public class CommandProcessor {
                 }
 
                 case "/users": {
-                    client.sendMessage(UNDERLINE.code() + BOLD.code() + "Online Users:" + RESET.code());
+                    client.sendMessage(UNDERLINE.code() + BOLD.code() + "Friends:" + RESET.code());
                     ArrayList<String> clients = server.getAllClients();
                     for (String user : clients) {
                         if (!client.username().equals(user)) client.sendMessage(user);
@@ -35,10 +35,9 @@ public class CommandProcessor {
                 }
 
                 case "/create": {
-                    System.out.println("In create case in switch statement");
                     server.addGroupChannel(args[1], client.username());
-                    System.out.println("Right after adding channel");
-                    client.sendMessage(BOLD.code() + "You've created the channel \"" + args[1] + "\" use /join to enter" + RESET.code());
+                    client.sendMessage(BOLD.code() + "You've created the channel \"" + args[1] +
+                            "\" use /join [channel name] to enter" + RESET.code());
                     break;
                 }
 
@@ -52,8 +51,8 @@ public class CommandProcessor {
                     break;
                 }
 
-                case "/rooms": {
-                    client.sendMessage(UNDERLINE.code() + BOLD.code() + "Available Rooms:" + RESET.code());
+                case "/groups": {
+                    client.sendMessage(UNDERLINE.code() + BOLD.code() + "Groups:" + RESET.code());
                     ArrayList<String> channels = server.getAllGroupChannels(client.username());
                     for (String channel : channels) {
                         client.sendMessage(channel);

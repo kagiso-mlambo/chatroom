@@ -49,17 +49,14 @@ public class ClientHandler implements  Runnable{
     }
 
 
-    public void sendMessage(String message){ printWriter.println(message); }
+    public void sendMessage(String message){
+        JSONObject response = Response.formResponse("OK", message);
+        printWriter.println(response);
+    }
 
 
     public void closeClient() {
         server.removeClient(username);
-
-        String exitNotificationMessage = BOLD.code() + "------------------------------" +
-                 "Server: " + username + " has left the chat!" +
-                 "------------------------------" + RESET.code() + "\n";
-
-        server.broadcastAll(exitNotificationMessage, username, channel);
 
         try {
             clientSocket.close();
@@ -128,7 +125,7 @@ public class ClientHandler implements  Runnable{
             username = user;
 
             commandProcessor.handleCommand("/users");
-            commandProcessor.handleCommand("/rooms");
+            commandProcessor.handleCommand("/groups");
 
             server.addClient(username, this);
 
@@ -144,8 +141,8 @@ public class ClientHandler implements  Runnable{
                     printWriter.println(response);
                 }
                 if (!data.startsWith("/")) {
-                    String message = ITALICS.code() + "[" + LocalTime.now().format(timeFormatter) + "] " + RESET.code() +
-                            username + ": " + request;
+                    String message = ITALICS.code() + "[" + LocalTime.now().format(timeFormatter) + "] " + RESET.code()
+                            + username + ": " + data;
                     server.broadcastAll(message, username, channel);
                 }
                 else{

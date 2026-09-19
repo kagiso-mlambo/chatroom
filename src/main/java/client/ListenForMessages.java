@@ -1,6 +1,8 @@
 package client;
 
 import common.ANSICodes;
+import common.Response;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,11 +19,14 @@ public class ListenForMessages implements Runnable{
     @Override
     public void run() {
         try {
-            String response;
+            JSONObject response;
+            String stringResponse;
 
-            while ((response = bufferedReader.readLine()) != null) {
+            while ((stringResponse = bufferedReader.readLine()) != null) {
+                response = new JSONObject(stringResponse);
                 System.out.print(ANSICodes.CLEAR.code());
-                System.out.println(response);
+                String data = Response.getData(response);
+                System.out.println(data);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
