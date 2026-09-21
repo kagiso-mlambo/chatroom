@@ -78,8 +78,7 @@ public class Client {
                 System.out.print("Enter your password: ");
                 String password = scanner.nextLine();
 
-                data = action + " " + username + " " + password;
-                request = Request.formRequest(client.sessionId, data);
+                request = Request.formAuthenticationRequest(action, username, password);
 
                 writer.println(request);
 

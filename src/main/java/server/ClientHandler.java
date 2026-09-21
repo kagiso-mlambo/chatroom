@@ -81,18 +81,18 @@ public class ClientHandler implements  Runnable{
             JSONObject response;
             String data;
 
-            String[] user_credentials;
+            JSONObject user_credentials;
             String command;
             String user = "";
             String password;
 
             while (true) {
                 request = new JSONObject(bufferedReader.readLine());
-                user_credentials = Request.getData(request).split(" ");
+                user_credentials = Request.getAuthenticationData(request);
 
-                command = user_credentials[0].toLowerCase();
-                user = user_credentials[1];
-                password = user_credentials[2];
+                command = user_credentials.getString("command");
+                user = user_credentials.getString("username");
+                password = user_credentials.getString("password");
 
 
                 if (command.equals("login")) {
