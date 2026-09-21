@@ -31,10 +31,11 @@ public class Server {
     private ChannelRepository channelRepo;
     private ChannelMembersRepository channelMembersRepo;
     private  MessagesRepository messagesRepo;
-    private double LOG_IN_TOKENS_LIMIT = 3;
-    private double TOKENS_PER_SECOND = (LOG_IN_TOKENS_LIMIT / 30.0);
+    private final double LOG_IN_TOKENS_LIMIT = 3;
+    private final double TOKENS_PER_SECOND = (LOG_IN_TOKENS_LIMIT / 30.0);
     private ConcurrentHashMap<String, TokenBucket> userLogInCounter;
     private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
+    private final int padding = 50;
 
 
     public Server() throws SQLException {
@@ -124,7 +125,7 @@ public class Server {
         int userID = userRepo.getUserId(username);
         for (Map.Entry<Integer, String> message : messages.entries()){
             if (!message.getKey().equals(userID)) {
-                String newMessage = " ".repeat(50) + message.getValue();
+                String newMessage = " ".repeat(padding) + message.getValue();
                 client.sendMessage(newMessage);
             } else { client.sendMessage(message.getValue()); }
         }
@@ -144,7 +145,8 @@ public class Server {
             clients.get(username).updateChannel(channelName);
             displayPreviousMessages(channelID, username);
             broadcastAll(joinNotificationMessage, username, channelName);
-        }
+
+        } else { clients.get("username").sendMessage("That group does not exist");}
     }
 
 
@@ -192,7 +194,7 @@ public class Server {
             if (clients.containsKey(member)) {
                 ClientHandler client = clients.get(member);
                 if (!client.username().equals(username)) {
-                    String newMessage = " ".repeat(50) + message;
+                    String newMessage = " ".repeat(padding) + message;
                     client.sendMessage(newMessage);
                 }
             }
