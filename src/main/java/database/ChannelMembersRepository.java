@@ -63,4 +63,18 @@ public class ChannelMembersRepository {
         return members;
     }
 
+    public boolean doesMemberExistInChannel(int userID, int channelID){
+        ArrayList <Integer> members = new ArrayList<>();
+        String userIDQuery = "SELECT user_id FROM channel_members WHERE channel_id = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(userIDQuery)){
+            preparedStatement.setInt(1, channelID);
+            ResultSet results = preparedStatement.executeQuery();
+            while (results.next()){ members.add(results.getInt("user_id")); }
+        }catch (SQLException e) {
+            LOGGER.warning("ChannelMemberRepository - getAllMembers: " + e.getMessage());
+        }
+        return members.contains(userID);
+    }
+
 }

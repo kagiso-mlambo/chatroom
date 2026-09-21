@@ -134,7 +134,6 @@ public class ClientHandler implements  Runnable{
                     printWriter.println(response);
                     messageTokenBucket.deductTokens();
                 }
-
                 long elapsedSeconds = Duration.between(messageTokenBucket.lastRefillTime(), Instant.now()).getSeconds();
                 double tokensEarned = elapsedSeconds * (10 / 60);
                 messageTokenBucket.addTokens(tokensEarned);
@@ -144,9 +143,10 @@ public class ClientHandler implements  Runnable{
                 String givenSessionId = Request.getSessionId(request);
                 data = Request.getData(request);
 
-                if (!validSessionId(givenSessionId)) {
+                if (!validSessionId(givenSessionId) || sessionId == null) {
                     response = Response.formResponse("ERROR", "401 Unauthorized");
                     printWriter.println(response);
+                    continue;
                 }
                 if (!data.startsWith("/")) {
                     String message = ITALICS.code() + "[" + LocalTime.now().format(timeFormatter) + "] " + RESET.code()

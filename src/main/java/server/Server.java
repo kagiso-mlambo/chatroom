@@ -1,7 +1,9 @@
 package server;
 
 import com.google.common.collect.Multimap;
+import common.Response;
 import database.*;
+import org.json.JSONObject;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -173,6 +175,11 @@ public class Server {
         }
         int channelID = channelRepo.getChannelID(channel);
         int userID =  userRepo.getUserId(username);
+
+        if (!channelMembersRepo.doesMemberExistInChannel(userID, channelID)){
+            ClientHandler client = clients.get(username);
+            client.sendMessage("You are not a member of this group");
+        }
 
         messagesRepo.addMessage(channelID, userID, message);
 
