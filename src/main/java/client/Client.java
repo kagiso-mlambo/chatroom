@@ -3,19 +3,24 @@ package client;
 import common.Request;
 import common.Response;
 import org.json.JSONObject;
+import server.Server;
+
 import javax.net.ssl.*;
 import java.io.*;
 import java.security.KeyStore;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 public class Client {
     private String sessionId = null;
+    private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
 
     private static SSLSocket createSocket(int serverPort) throws Exception{
         // 1. Load the truststore file into a KeyStore object
         KeyStore trustStore = KeyStore.getInstance("PKCS12");
         try (InputStream fis = Client.class.getClassLoader().getResourceAsStream("client-truststore.p12")) {
             if (fis == null) {
+                LOGGER.warning("client-truststore.p12 not found on classpath");
                 throw new FileNotFoundException("client-truststore.p12 not found on classpath");
             }
             trustStore.load(fis, "daWorld09".toCharArray());
@@ -43,6 +48,7 @@ public class Client {
 
 
     public static void main(String[] args) throws Exception {
+        LOGGER.info("Client Application started");
         Client client = new Client();
 
         try {
@@ -80,6 +86,7 @@ public class Client {
                 try {
                     response = new JSONObject(reader.readLine());
                 } catch (IOException e) {
+                    LOGGER.warning("Client: " + e.getMessage());
                     throw new RuntimeException(e);
                 }
 
@@ -108,7 +115,7 @@ public class Client {
                 }
             }
         } catch(Exception e) {
-            System.out.println(e.getMessage());
+            LOGGER.warning("Client: " + e.getMessage());
             System.out.println("The Server is currently unavailable");
         }
     }

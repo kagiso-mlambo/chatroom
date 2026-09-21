@@ -5,10 +5,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
+
 import org.mindrot.jbcrypt.BCrypt;
 
 public class UserRepository {
     private final Connection connection;
+    private static final Logger LOGGER = Logger.getLogger(UserRepository.class.getName());
 
     public UserRepository(Connection connection) {
         this.connection = connection;
@@ -38,8 +41,7 @@ public class UserRepository {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("UserRepository - Method logIn: ");
-            System.out.println(e);
+            LOGGER.warning("UserRepository - Method logIn: " + e.getMessage());
         }
         return "Logged in successfully";
     }
@@ -58,8 +60,7 @@ public class UserRepository {
             if (e.getMessage().contains("UNIQUE constraint failed")) {
                 return "That username is already taken, please choose another.";
             }
-                System.out.println("UserRepository - Method signUp: ");
-                System.out.println(e);
+                LOGGER.warning("UserRepository - Method signUp: " + e.getMessage());
         }
         return "Sign up successful!";
     }
@@ -74,8 +75,7 @@ public class UserRepository {
                 return true;
             }
         } catch (SQLException e) {
-            System.out.println("UserRepository - Method checkIfUserExists: ");
-            System.out.println(e);
+            LOGGER.warning("UserRepository - Method checkIfUserExists: " + e.getMessage());
         }
         return false;
     }
@@ -91,8 +91,7 @@ public class UserRepository {
                 id = result.getInt("id");
             }
         } catch (SQLException e) {
-            System.out.println("UserRepository - Method getUserId: ");
-            System.out.println(e);
+            LOGGER.warning("UserRepository - Method getUserId: " + e.getMessage());
         }
         return id;
     }
@@ -107,8 +106,7 @@ public class UserRepository {
                 users.add(results.getString("username"));
             }
         } catch (SQLException e) {
-            System.out.println("UserRepository - Method getAllUsers: ");
-            System.out.println(e);
+            LOGGER.warning("UserRepository - Method getAllUsers: " + e.getMessage());
         }
         return users;
     }
@@ -122,8 +120,7 @@ public class UserRepository {
             ResultSet results = preparedStatement.executeQuery();
             if (results.next()){username = results.getString("username"); }
         } catch (SQLException e) {
-            System.out.println("UserRepository - Method getAUsers: ");
-            System.out.println(e);
+            LOGGER.warning("UserRepository - Method getAUsers: " + e.getMessage());
         }
         return username;
     }

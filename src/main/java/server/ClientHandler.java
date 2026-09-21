@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.util.UUID;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.logging.Logger;
 
 import static common.ANSICodes.*;
 import static java.lang.Math.min;
@@ -26,6 +27,7 @@ public class ClientHandler implements  Runnable{
     private String channel;
     private CommandProcessor commandProcessor;
     private final double MESSAGE_TOKENS_LIMIT = 10;
+    private static final Logger LOGGER = Logger.getLogger(ClientHandler.class.getName());
 
     public ClientHandler(Server server, Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -36,8 +38,7 @@ public class ClientHandler implements  Runnable{
             printWriter = new PrintWriter(clientSocket.getOutputStream(), true);
             bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         } catch (IOException e) {
-            System.out.println("ClientHandler - Constructor: ");
-            System.out.println(e);
+            LOGGER.warning("ClientHandler - Constructor: " + e.getMessage());
         }
     }
 
@@ -62,8 +63,7 @@ public class ClientHandler implements  Runnable{
         try {
             clientSocket.close();
         } catch (IOException e) {
-            System.out.println("ClientHandler - Method closeClient: ");
-            System.out.println(e);
+            LOGGER.warning("ClientHandler - Method closeClient: " + e.getMessage());
         }
     }
 
@@ -166,8 +166,7 @@ public class ClientHandler implements  Runnable{
             }
 
         } catch (IOException e) {
-            System.out.println("ClientHandler - Method run: ");
-            System.out.println(e);
+            LOGGER.warning("ClientHandler - Method run: " + e.getMessage());
         }
     }
 }

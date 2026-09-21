@@ -17,6 +17,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 import static common.ANSICodes.*;
 import static java.lang.Math.min;
@@ -30,6 +31,7 @@ public class Server {
     private  MessagesRepository messagesRepo;
     private double LOG_IN_TOKENS_LIMIT = 3;
     private ConcurrentHashMap<String, TokenBucket> userLogInCounter;
+    private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
 
 
     public Server() throws SQLException {
@@ -47,6 +49,7 @@ public class Server {
 
     public String logIn(String user, String password) {
         TokenBucket userTokenBucket;
+
         if (!userLogInCounter.containsKey(user)) {
             userTokenBucket = new TokenBucket(LOG_IN_TOKENS_LIMIT, Instant.now());
             userLogInCounter.put(user, userTokenBucket);
@@ -99,8 +102,7 @@ public class Server {
             if (deleted) clients.get(username).sendMessage("Channel successfully deleted");
             else clients.get(username).sendMessage("Could not delete channel");
         } catch (SQLException e) {
-            System.out.println("Server - Method deleteChannel: ");
-            System.out.println(e);
+            LOGGER.warning("Server - Method deleteChannel: " + e);
         }
     }
 
@@ -211,6 +213,7 @@ public class Server {
 
 
     public static void main(String[] args) throws Exception {
+        LOGGER.info("Server has started.");
         Server server = new Server();
         ServerSocket severSocket = createServerSocket(8081);
 

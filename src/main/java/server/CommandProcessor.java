@@ -3,12 +3,14 @@ package server;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import static common.ANSICodes.*;
 
 public class CommandProcessor {
     private Server server;
     private ClientHandler client;
+    private static final Logger LOGGER = Logger.getLogger(CommandProcessor.class.getName());
 
     public CommandProcessor(Server server, ClientHandler client){
         this.server = server;
@@ -68,8 +70,7 @@ public class CommandProcessor {
 
             }
         } catch (SQLException e) {
-            System.out.println("CommandProcessor - Method handleCommand: ");
-            System.out.println(e);
+           LOGGER.warning("CommandProcessor - Method handleCommand: " + e.getMessage());
         }
     }
 }

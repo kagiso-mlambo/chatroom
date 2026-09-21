@@ -7,10 +7,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 public class MessagesRepository {
     private Connection connection;
     private final int MESSAGE_LIMIT = 20;
+    private static final Logger LOGGER = Logger.getLogger(MessagesRepository.class.getName());
 
     public MessagesRepository(Connection connection){
         this.connection = connection;
@@ -25,8 +27,7 @@ public class MessagesRepository {
             preparedStatement.setString(3, message);
             preparedStatement.executeUpdate();
         }  catch (SQLException e) {
-            System.out.println("MessagesRepository - addMessage: ");
-            System.out.println(e);
+            LOGGER.warning("MessagesRepository - addMessage: " + e.getMessage());
         }
     }
 
@@ -47,8 +48,7 @@ public class MessagesRepository {
                 lastMessages.put(userID, message);
             }
         } catch (SQLException e) {
-            System.out.print("UserRepository - Method getAUsers: ");
-            System.out.println(e);
+            LOGGER.warning("UserRepository - Method getAUsers: " + e.getMessage());
         }
         return lastMessages;
     }

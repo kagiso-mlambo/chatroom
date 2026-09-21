@@ -5,11 +5,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 public class ChannelRepository {
     private Connection connection;
     private ChannelMembersRepository channelMembersRepo;
     private UserRepository userRepo;
+    private static final Logger LOGGER = Logger.getLogger(ChannelRepository.class.getName());
 
     public ChannelRepository(Connection connection, ChannelMembersRepository channelMembersRepo, UserRepository userRepo){
         this.connection = connection;
@@ -26,8 +28,7 @@ public class ChannelRepository {
             ResultSet results = preparedStatement.executeQuery();
             if (results.next()) channelID = results.getInt("id");
         } catch (SQLException e) {
-            System.out.println("ChannelRepository - Method getChannelID: ");
-            System.out.println(e);
+            LOGGER.warning("ChannelRepository - Method getChannelID: " + e.getMessage());
         }
 
         return channelID;
@@ -55,8 +56,7 @@ public class ChannelRepository {
             }
 
         } catch (SQLException e) {
-            System.out.println("ChannelRepository - Method privateChannel: ");
-            System.out.println(e);
+            LOGGER.warning("ChannelRepository - Method privateChannel: " + e.getMessage());
         }
         return channelID;
     }
@@ -69,8 +69,7 @@ public class ChannelRepository {
             preparedStatement.setString(2, "private");
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("ChannelRepository - Method insertNewChannel: ");
-            System.out.println(e);
+            LOGGER.warning("ChannelRepository - Method insertNewChannel: " + e.getMessage());
         }
     }
 
@@ -83,8 +82,7 @@ public class ChannelRepository {
             ResultSet channelResults = pStmt.executeQuery();
             while (channelResults.next()){ channels.add(channelResults.getString("name")); }
         } catch (SQLException e){
-            System.out.println("ChannelRepository - Method getUserChannels: ");
-            System.out.println(e);
+            LOGGER.warning("ChannelRepository - Method getUserChannels: " + e.getMessage());
         }
         return channels;
     }
@@ -98,8 +96,7 @@ public class ChannelRepository {
             preparedStatement.setString(3, creator);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("ChannelRepository - Method createGroupChannel: ");
-            System.out.println(e);
+            LOGGER.warning("ChannelRepository - Method createGroupChannel: " + e.getMessage());
         }
     }
 
@@ -113,8 +110,7 @@ public class ChannelRepository {
                 if (channelResults.getString("creator").equals(username)){ return true; }
             }
         } catch (SQLException e) {
-            System.out.print("ChannelRepository - Method deleteChannel: ");
-            System.out.println(e);
+            LOGGER.warning("ChannelRepository - Method deleteChannel: " + e.getMessage());
         }
         return false;
     }
@@ -132,8 +128,7 @@ public class ChannelRepository {
             preparedStatement.setString(1, channelName);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("ChannelRepository - Method deleteChannel: ");
-            System.out.println(e);
+            LOGGER.warning("ChannelRepository - Method deleteChannel: " + e.getMessage());
             return false;
         }
         return true;
