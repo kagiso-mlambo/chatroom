@@ -9,12 +9,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.sql.SQLException;
 import java.util.UUID;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 import static common.ANSICodes.*;
+import static java.lang.Math.min;
 
 public class ClientHandler implements  Runnable{
     private String username;
@@ -25,6 +25,7 @@ public class ClientHandler implements  Runnable{
     private final Server server;
     private String channel;
     private CommandProcessor commandProcessor;
+    private final double MESSAGE_TOKENS_LIMIT = 10;
 
     public ClientHandler(Server server, Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -65,6 +66,7 @@ public class ClientHandler implements  Runnable{
             System.out.println(e);
         }
     }
+
 
     public boolean validSessionId(String sessionId){
         return this.sessionId.equals(sessionId);
@@ -123,15 +125,28 @@ public class ClientHandler implements  Runnable{
             }
 
             username = user;
-
             commandProcessor.handleCommand("/users");
             commandProcessor.handleCommand("/groups");
 
             server.addClient(username, this);
 
+            TokenBucket messageTokenBucket = new TokenBucket(MESSAGE_TOKENS_LIMIT, Instant.now());
+
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
             String stringRequest;
             while ((stringRequest = bufferedReader.readLine()) != null){
+
+                if (messageTokenBucket.tokens() < 1){
+                    response = Response.formResponse("ERROR", "Too many request sent to the server");
+                    printWriter.println(response);
+                    messageTokenBucket.deductTokens();
+                }
+
+                long elapsedSeconds = Duration.between(messageTokenBucket.lastRefillTime(), Instant.now()).getSeconds();
+                double tokensEarned = elapsedSeconds * (10 / 60);
+                messageTokenBucket.addTokens(tokensEarned);
+                messageTokenBucket.updateLastRefillTime();
+
                 request = new JSONObject(stringRequest);
                 String givenSessionId = Request.getSessionId(request);
                 data = Request.getData(request);

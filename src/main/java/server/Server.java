@@ -1,10 +1,7 @@
 package server;
 
 import com.google.common.collect.Multimap;
-import common.Response;
 import database.*;
-import org.checkerframework.checker.units.qual.K;
-import org.json.JSONObject;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -16,22 +13,29 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static common.ANSICodes.*;
+import static java.lang.Math.min;
 
 public class Server {
-    private HashMap<String, ClientHandler> clients;
-    private HashMap<String, Channel> channels;
+    private ConcurrentHashMap<String, ClientHandler> clients;
+    private ConcurrentHashMap<String, Channel> channels;
     private UserRepository userRepo;
     private ChannelRepository channelRepo;
     private ChannelMembersRepository channelMembersRepo;
     private  MessagesRepository messagesRepo;
+    private double LOG_IN_TOKENS_LIMIT = 3;
+    private ConcurrentHashMap<String, TokenBucket> userLogInCounter;
 
 
     public Server() throws SQLException {
-        clients = new HashMap<>();
-        channels = new HashMap<>();
+        clients = new ConcurrentHashMap<>();
+        channels = new ConcurrentHashMap<>();
+        userLogInCounter = new ConcurrentHashMap<>();
         DatabaseInitialiser.initialise();
         Connection connection = DatabaseConnection.getConnection();
         userRepo = new UserRepository(connection);
@@ -42,6 +46,21 @@ public class Server {
 
 
     public String logIn(String user, String password) {
+        TokenBucket userTokenBucket;
+        if (!userLogInCounter.containsKey(user)) {
+            userTokenBucket = new TokenBucket(LOG_IN_TOKENS_LIMIT, Instant.now());
+            userLogInCounter.put(user, userTokenBucket);
+        } else { userTokenBucket = userLogInCounter.get(user); }
+
+        if (userTokenBucket.tokens() < 1){
+            return "Too many login attempt wait before trying again";
+        }
+
+        long elapsedSeconds = Duration.between(userTokenBucket.lastRefillTime(), Instant.now()).getSeconds();
+        double tokensEarned = elapsedSeconds * (10 / 60);
+        userTokenBucket.addTokens(tokensEarned);
+        userTokenBucket.updateLastRefillTime();
+
         return userRepo.logIn(user, password);
     }
 
