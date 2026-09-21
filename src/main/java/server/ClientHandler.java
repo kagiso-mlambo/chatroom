@@ -86,8 +86,7 @@ public class ClientHandler implements  Runnable{
             String user = "";
             String password;
 
-            int faliedLogins =0;
-            while (faliedLogins < 3) {
+            while (true) {
                 request = new JSONObject(bufferedReader.readLine());
                 user_credentials = Request.getData(request).split(" ");
 
@@ -115,13 +114,7 @@ public class ClientHandler implements  Runnable{
                     response = Response.formResponse("OK", sessionId);
                     printWriter.println(response);
                     break;
-                } else { faliedLogins++; }
-            }
-
-            if (faliedLogins == 3){
-                response = Response.formResponse("ERROR", "Too many failed please try again later!");
-                printWriter.println(response);
-                clientSocket.close();
+                }
             }
 
             username = user;
