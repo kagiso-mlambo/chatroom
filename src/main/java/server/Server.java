@@ -32,6 +32,7 @@ public class Server {
     private ChannelMembersRepository channelMembersRepo;
     private  MessagesRepository messagesRepo;
     private double LOG_IN_TOKENS_LIMIT = 3;
+    private double TOKENS_PER_SECOND = (LOG_IN_TOKENS_LIMIT / 30.0);
     private ConcurrentHashMap<String, TokenBucket> userLogInCounter;
     private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
 
@@ -61,8 +62,9 @@ public class Server {
             return "Too many login attempt wait before trying again";
         }
 
+        userTokenBucket.deductTokens();
         long elapsedSeconds = Duration.between(userTokenBucket.lastRefillTime(), Instant.now()).getSeconds();
-        double tokensEarned = elapsedSeconds * (10 / 60);
+        double tokensEarned = elapsedSeconds * TOKENS_PER_SECOND;
         userTokenBucket.addTokens(tokensEarned);
         userTokenBucket.updateLastRefillTime();
 
@@ -179,6 +181,7 @@ public class Server {
         if (!channelMembersRepo.doesMemberExistInChannel(userID, channelID)){
             ClientHandler client = clients.get(username);
             client.sendMessage("You are not a member of this group");
+            return;
         }
 
         messagesRepo.addMessage(channelID, userID, message);

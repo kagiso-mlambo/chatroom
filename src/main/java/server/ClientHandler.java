@@ -27,6 +27,7 @@ public class ClientHandler implements  Runnable{
     private String channel;
     private CommandProcessor commandProcessor;
     private final double MESSAGE_TOKENS_LIMIT = 10;
+    private final double TOKENS_PER_SECOND = MESSAGE_TOKENS_LIMIT / 60.0;
     private static final Logger LOGGER = Logger.getLogger(ClientHandler.class.getName());
 
     public ClientHandler(Server server, Socket clientSocket) {
@@ -90,7 +91,7 @@ public class ClientHandler implements  Runnable{
                 request = new JSONObject(bufferedReader.readLine());
                 user_credentials = Request.getAuthenticationData(request);
 
-                command = user_credentials.getString("command");
+                command = user_credentials.getString("command").toLowerCase();
                 user = user_credentials.getString("username");
                 password = user_credentials.getString("password");
 
@@ -132,10 +133,10 @@ public class ClientHandler implements  Runnable{
                 if (messageTokenBucket.tokens() < 1){
                     response = Response.formResponse("ERROR", "Too many request sent to the server");
                     printWriter.println(response);
-                    messageTokenBucket.deductTokens();
                 }
+                messageTokenBucket.deductTokens();
                 long elapsedSeconds = Duration.between(messageTokenBucket.lastRefillTime(), Instant.now()).getSeconds();
-                double tokensEarned = elapsedSeconds * (10 / 60);
+                double tokensEarned = elapsedSeconds * TOKENS_PER_SECOND;
                 messageTokenBucket.addTokens(tokensEarned);
                 messageTokenBucket.updateLastRefillTime();
 
