@@ -2,7 +2,22 @@ package database;
 
 import java.sql.*;
 
+
+/**
+ * Creates the chatroom database's schema on server startup.
+ *
+ * Sets up all four tables (users, channels, channel_members, messages) using
+ * "CREATE TABLE IF NOT EXISTS", so it's safe to call every time the server
+ * starts without wiping existing data.
+ */
 public class DatabaseInitialiser {
+
+    /**
+     * Creates the users, channels, channel_members, and messages tables if
+     * they don't already exist.
+     *
+     * @throws SQLException if a database access error occurs
+     */
     public static void initialise() throws SQLException {
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement()) {

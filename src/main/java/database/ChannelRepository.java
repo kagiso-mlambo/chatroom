@@ -7,18 +7,43 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+
+/**
+ * Handles persistence for channels, both named group channels (created with
+ * /create) and the private, two person channels used for direct messages.
+ *
+ * Depends on {@link ChannelMembersRepository} to keep channel membership in
+ * sync whenever a channel is created or deleted, and on {@link UserRepository}
+ * to resolve usernames to user ids for private channel creation.
+ */
 public class ChannelRepository {
     private Connection connection;
     private ChannelMembersRepository channelMembersRepo;
     private UserRepository userRepo;
     private static final Logger LOGGER = Logger.getLogger(ChannelRepository.class.getName());
 
+
+    /**
+     * Creates a repository backed by the given database connection and
+     * collaborating repositories.
+     *
+     * @param connection an open JDBC connection to the chatroom database
+     * @param channelMembersRepo used to add and remove channel membership rows
+     * @param userRepo used to resolve usernames to user ids
+     */
     public ChannelRepository(Connection connection, ChannelMembersRepository channelMembersRepo, UserRepository userRepo){
         this.connection = connection;
         this.channelMembersRepo = channelMembersRepo;
         this.userRepo = userRepo;
     }
 
+
+    /**
+     * Looks up a channel's id by name.
+     *
+     * @param channelName the channel's name
+     * @return the channel's id, or -1 if no channel with that name exists
+     */
     public int getChannelID(String channelName){
         int channelID = -1;
         String query = "SELECT id FROM channels WHERE name = ?";
@@ -34,6 +59,17 @@ public class ChannelRepository {
         return channelID;
     }
 
+
+    /**
+     * Finds the id of the private channel between two users, creating it
+     * (and adding both users as members) if it doesn't exist yet.
+     *
+     * @param channelName the deterministic name for this pair's private
+     *                    channel, built from the two usernames
+     * @param sender the user initiating or continuing the private message
+     * @param receiver the user on the other end of the private message
+     * @return the private channel's id
+     */
     public int privateChannel(String channelName, String sender, String receiver) {
         String selectQuery = "SELECT id FROM channels WHERE name = ?";
         int channelID = -1;
@@ -61,6 +97,14 @@ public class ChannelRepository {
         return channelID;
     }
 
+
+    /**
+     * Inserts a new row into the channels table with type "private".
+     * Used internally by {@link #privateChannel(String, String, String)}
+     * when a private channel doesn't exist yet.
+     *
+     * @param channelName the name to give the new channel
+     */
     private void insertNewChannel(String channelName) {
         String insertQuery = "INSERT INTO channels (name, type) VALUES (?, ?)";
 
@@ -73,6 +117,13 @@ public class ChannelRepository {
         }
     }
 
+
+    /**
+     * Lists the names of every group channel.
+     *
+     * @param userID currently unused, the result is the same for every caller
+     * @return the names of all channels of type "group"
+     */
     public ArrayList<String> getChannels(int userID) {
         ArrayList<String> channels =  new ArrayList<>();
         String channelQuery = "SELECT name FROM channels WHERE type = ?";
@@ -87,6 +138,14 @@ public class ChannelRepository {
         return channels;
     }
 
+
+    /**
+     * Creates a new named group channel, recording who created it so
+     * {@link #deleteChannel(String, String)} can later verify ownership.
+     *
+     * @param channelName the name for the new channel
+     * @param creator the username of the user creating the channel
+     */
     public void createGroupChannel(String channelName, String creator) {
         String query = "INSERT INTO channels (name, type, creator) VALUES (?, ?, ?)";
 
@@ -100,6 +159,16 @@ public class ChannelRepository {
         }
     }
 
+
+    /**
+     * Checks whether a given user is the creator of a given channel.
+     * Used to authorize channel deletion, so only the creator can delete it.
+     *
+     * @param channelName the channel to check
+     * @param username the username to check ownership for
+     * @return true if the user created the channel, false otherwise or if
+     *         the channel doesn't exist
+     */
     private boolean checkCreator(String channelName, String username){
         String query = "SELECT * FROM channels WHERE name = ?";
 
@@ -115,6 +184,17 @@ public class ChannelRepository {
         return false;
     }
 
+
+    /**
+     * Deletes a channel and all of its membership rows, but only if the
+     * requesting user is the channel's creator.
+     *
+     * @param channelName the channel to delete
+     * @param username the username requesting the deletion
+     * @return true if the channel was deleted, false if the user isn't the
+     *         creator or the deletion failed
+     * @throws SQLException if a database error occurs
+     */
     public boolean deleteChannel(String channelName, String username) throws SQLException{
         if (!checkCreator(channelName, username)) {return false; };
 

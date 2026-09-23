@@ -9,15 +9,37 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
+
+/**
+ * Handles persistence for chat messages: saving new ones and retrieving
+ * recent history for a channel.
+ *
+ * Used both when a message is broadcast (to save it) and when a client
+ * joins a channel or opens a private message (to replay recent history).
+ */
 public class MessagesRepository {
     private Connection connection;
     private final int MESSAGE_LIMIT = 20;
     private static final Logger LOGGER = Logger.getLogger(MessagesRepository.class.getName());
 
+
+    /**
+     * Creates a repository backed by the given database connection.
+     *
+     * @param connection an open JDBC connection to the chatroom database
+     */
     public MessagesRepository(Connection connection){
         this.connection = connection;
     }
 
+
+    /**
+     * Saves a message to a channel.
+     *
+     * @param channelID the id of the channel the message was sent to
+     * @param userID the id of the user who sent the message
+     * @param message the message content
+     */
     public void addMessage(int channelID, int userID, String message){
         String query = "INSERT INTO messages (channel_id, user_id, content) VALUES (?, ?, ?)";
 
@@ -31,6 +53,14 @@ public class MessagesRepository {
         }
     }
 
+
+    /**
+     * Retrieves the most recent messages in a channel, oldest first, so they
+     * can be replayed to a client in the order they were originally sent.
+     *
+     * @param channelId the id of the channel to retrieve history for
+     * @return the channel's recent messages, keyed by the sender's user id
+     */
     public Multimap<Integer, String> getLastMessages(int channelId){
         Multimap<Integer, String> lastMessages = LinkedListMultimap.create();
         String query = "SELECT * FROM messages WHERE channel_id = ? ORDER BY sent_at ASC LIMIT 20";
