@@ -16,21 +16,25 @@ public class Client {
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
 
     private static SSLSocket createSocket(int serverPort) throws Exception{
-        // 1. Load the truststore file into a KeyStore object
         KeyStore trustStore = KeyStore.getInstance("PKCS12");
         try (InputStream fis = Client.class.getClassLoader().getResourceAsStream("client-truststore.p12")) {
             if (fis == null) {
                 LOGGER.warning("client-truststore.p12 not found on classpath");
                 throw new FileNotFoundException("client-truststore.p12 not found on classpath");
             }
-            trustStore.load(fis, "daWorld09".toCharArray());
+
+            String truststorePassword = System.getenv("TRUSTSTORE_PASSWORD");
+
+            if (truststorePassword == null) {
+                throw new IllegalStateException("TRUSTSTORE_PASSWORD environment variable is not set");
+            }
+
+            trustStore.load(fis, truststorePassword.toCharArray());
         }
 
-        // 2. Create a TrustManagerFactory and initialize it with the truststore
         TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()); // usually "PKIX"
         tmf.init(trustStore);
 
-        // 3. Build an SSLContext using those trust managers
         SSLContext sslContext = SSLContext.getInstance("TLS");
         sslContext.init(null, tmf.getTrustManagers(), null);
 

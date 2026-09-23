@@ -146,7 +146,9 @@ public class Server {
             displayPreviousMessages(channelID, username);
             broadcastAll(joinNotificationMessage, username, channelName);
 
-        } else { clients.get("username").sendMessage("That group does not exist");}
+        } else {
+            clients.get(username).sendMessage("That group does not exist");
+        }
     }
 
 
@@ -204,7 +206,13 @@ public class Server {
 
 
     private static ServerSocket createServerSocket(int port) throws Exception{
-      char[] password = "daWorld09".toCharArray();
+        String keystorePassword = System.getenv("KEYSTORE_PASSWORD");
+
+        if (keystorePassword == null) {
+            throw new IllegalStateException("KEYSTORE_PASSWORD environment variable is not set");
+        }
+        char[] password = keystorePassword.toCharArray();
+
       KeyStore keyStore = KeyStore.getInstance("PKCS12");
         try (InputStream ks = Server.class.getClassLoader().getResourceAsStream("server.p12")) {
             if (ks == null) {
