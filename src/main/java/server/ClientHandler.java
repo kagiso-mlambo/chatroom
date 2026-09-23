@@ -17,6 +17,17 @@ import java.util.logging.Logger;
 import static common.ANSICodes.*;
 import static java.lang.Math.min;
 
+
+/**
+ * Handles one connected client's entire lifecycle, from authentication
+ * through to disconnect, running on its own thread.
+ *
+ * Authenticates the client (login or signup), issues and verifies a session
+ * ID on every subsequent request, rate limits how fast the client can send
+ * messages using a token bucket, and delegates anything starting with "/"
+ * to {@link CommandProcessor}. Everything else is treated as a chat message
+ * and broadcast to the client's current channel.
+ */
 public class ClientHandler implements  Runnable{
     private String username;
     private String sessionId;
@@ -30,6 +41,14 @@ public class ClientHandler implements  Runnable{
     private final double TOKENS_PER_SECOND = MESSAGE_TOKENS_LIMIT / 60.0;
     private static final Logger LOGGER = Logger.getLogger(ClientHandler.class.getName());
 
+
+    /**
+     * Wraps a newly accepted socket, setting up the reader/writer used for
+     * the rest of this client's session.
+     *
+     * @param server the server this client is connected to
+     * @param clientSocket the accepted socket for this client
+     */
     public ClientHandler(Server server, Socket clientSocket) {
         this.clientSocket = clientSocket;
         this.server = server;
@@ -44,20 +63,38 @@ public class ClientHandler implements  Runnable{
     }
 
 
+    /**
+     * @return this client's authenticated username, or null before login/signup completes
+     */
     public String username(){ return username; }
 
 
+    /**
+     * Sets which channel this client is currently active in, so a plain
+     * (non command) message from them is broadcast to the right place.
+     *
+     * @param channel the name of the channel to switch to
+     */
     public void updateChannel(String channel){
         this.channel = channel;
     }
 
 
+    /**
+     * Sends a message directly to this client.
+     *
+     * @param message the text to send
+     */
     public void sendMessage(String message){
         JSONObject response = Response.formResponse("OK", message);
         printWriter.println(response);
     }
 
 
+    /**
+     * Disconnects this client: removes them from the server's connected
+     * client list and closes the underlying socket.
+     */
     public void closeClient() {
         server.removeClient(username);
 
@@ -69,11 +106,25 @@ public class ClientHandler implements  Runnable{
     }
 
 
+    /**
+     * Checks whether a session ID matches the one issued to this client at
+     * login, so a request can be verified as actually coming from them
+     * rather than trusting a client supplied username.
+     *
+     * @param sessionId the session ID to check
+     * @return true if it matches this client's session ID, false otherwise
+     */
     public boolean validSessionId(String sessionId){
         return this.sessionId.equals(sessionId);
     }
 
 
+    /**
+     * Runs this client's session: first an authentication loop that repeats
+     * until login or signup succeeds and a session ID is issued, then a
+     * message loop that rate limits, verifies, and processes everything the
+     * client sends until they disconnect.
+     */
     @Override
     public void run() {
         try {

@@ -51,7 +51,8 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <finalName>ChatRoom-Server</finalName>
+                            <finalName>Chatroom-Server</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                             <archive>
                                 <manifest>
                                     <mainClass>server.Server</mainClass>
@@ -69,7 +70,8 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <finalName>ChatRoom-Client</finalName>
+                            <finalName>Chatroom-Client</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                             <archive>
                                 <manifest>
                                     <mainClass>client.Client</mainClass>
