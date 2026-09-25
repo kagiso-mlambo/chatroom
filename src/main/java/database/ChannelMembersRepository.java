@@ -39,9 +39,10 @@ public class ChannelMembersRepository {
      * @param userId the id of the user to add
      */
     public void addMemberToChannel(int channelId, int userId) {
-        String userIDQuery = "SELECT user_id FROM channel_members WHERE user_id = ?";
+        String userIDQuery = "SELECT user_id FROM channel_members WHERE user_id = ? AND channel_id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(userIDQuery)){
             preparedStatement.setInt(1, userId);
+            preparedStatement.setInt(2, channelId);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()){ return; }
         } catch (SQLException e) {
