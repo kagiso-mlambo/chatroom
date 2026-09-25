@@ -100,7 +100,7 @@ public class Client {
      * incoming messages and enters a loop reading the user's input and
      * sending it to the server as chat messages or commands.
      *
-     * Typing {@code /quit} (case insensitive) sends the quit command to the
+     * Typing {@code /quit} (case-insensitive) sends the quit command to the
      * server and exits the application.
      *
      * @param args not used
