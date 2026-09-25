@@ -67,12 +67,10 @@ This project treats security as a first class feature rather than an afterthough
 
 ### 1. Generate a certificate and keystore
 
-From the project root, generate a self signed certificate for the server:
+From the project root, generate a self-signed certificate for the server:
 
 ```bash
-keytool -genkeypair -alias chatserver -keyalg RSA -keysize 2048 \
-  -validity 365 -keystore src/main/resources/server.p12 \
-  -storetype PKCS12
+keytool -genkeypair -alias chatserver -keyalg RSA -validity 365 -keystore src/main/resources/server.p12 -storetype PKCS12
 ```
 
 You'll be prompted to set a password. Use the same value you plan to export as `KEYSTORE_PASSWORD` below.
@@ -80,18 +78,13 @@ You'll be prompted to set a password. Use the same value you plan to export as `
 Export the public certificate so the client can trust it:
 
 ```bash
-keytool -exportcert -alias chatserver \
-  -keystore src/main/resources/server.p12 -storetype PKCS12 \
-  -file src/main/resources/server.cert
+keytool -exportcert -alias chatserver -keystore src/main/resources/server.p12 -storetype PKCS12 -file src/main/resources/server.cert
 ```
 
 Import that certificate into a client side truststore:
 
 ```bash
-keytool -importcert -alias chatserver -noprompt \
-  -file src/main/resources/server.cert \
-  -keystore src/main/resources/client-truststore.p12 \
-  -storetype PKCS12
+keytool -importcert -alias chatserver -noprompt -file src/main/resources/server.cert -keystore src/main/resources/client-truststore.p12 -storetype PKCS12
 ```
 
 You'll be prompted to set a truststore password. This can be the same value or different from the keystore password. Use whatever you set here as `TRUSTSTORE_PASSWORD` below.
@@ -103,7 +96,14 @@ export KEYSTORE_PASSWORD=your_keystore_password
 export TRUSTSTORE_PASSWORD=your_truststore_password
 ```
 
-Set these once in your shell's profile (`~/.zshrc` / `~/.bashrc`) so you don't need to re-export them every session, or configure them under your IDE's run configuration.
+On Windows PowerShell, use:
+
+```powershell
+$env:KEYSTORE_PASSWORD = "your_keystore_password"
+$env:TRUSTSTORE_PASSWORD = "your_truststore_password"
+```
+
+Set these once in your shell's profile (`~/.zshrc` / `~/.bashrc` for bash/zsh, or your PowerShell `$PROFILE` script on Windows) so you don't need to re-export them every session, or configure them under your IDE's run configuration.
 
 ### 3. Build
 
@@ -160,11 +160,10 @@ SQLite is used via raw JDBC (no ORM), with four tables:
 
 ## Known Limitations
 
-- The TLS certificate is self signed, so it is trusted only because the client's truststore explicitly imports it. A public deployment would use a CA issued certificate instead.
+- The TLS certificate is self-signed, so it is trusted only because the client's truststore explicitly imports it. A public deployment would use a CA issued certificate instead.
 - Session tokens don't expire or rotate; a token is valid for the lifetime of the connection it was issued on.
 - There is no password complexity policy on signup beyond BCrypt's own handling of arbitrary length input.
 - Rate limiter state is held in memory and resets if the server restarts.
-- No automated test suite yet.
 
 ## Technologies Used
 
