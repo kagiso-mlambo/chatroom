@@ -111,20 +111,20 @@ Set these once in your shell's profile (`~/.zshrc` / `~/.bashrc` for bash/zsh, o
 mvn clean package
 ```
 
-This produces two runnable jars under `target/`: `ChatRoom-Server.jar` and `ChatRoom-Client.jar`.
+This produces two runnable jars under `target/`: `Chatroom-Server.jar` and `Chatroom-Client.jar`.
 
 ### 4. Run
 
 Start the server first:
 
 ```bash
-java -jar target/ChatRoom-Server.jar
+java -jar target/Chatroom-Server.jar
 ```
 
 Then start one or more clients in separate terminals:
 
 ```bash
-java -jar target/ChatRoom-Client.jar
+java -jar target/Chatroom-Client.jar
 ```
 
 Follow the prompts to sign up or log in, then use the in chat commands (`/create`, `/join`, `/groups`, `/users`, `/quit`, or `/<username>` for a private message).

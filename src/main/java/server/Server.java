@@ -329,7 +329,7 @@ public class Server {
         ArrayList<String> members = channelMembersRepo.getAllMembers(channelID, userRepo);
 
         for(String member : members){
-            if (clients.containsKey(member)) {
+            if (clients.containsKey(member) && clients.get(member).channel().equals(channel) ) {
                 ClientHandler client = clients.get(member);
                 if (!client.username().equals(username)) {
                     String newMessage = " ".repeat(padding) + message;

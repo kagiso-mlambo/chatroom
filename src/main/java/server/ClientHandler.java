@@ -80,6 +80,9 @@ public class ClientHandler implements  Runnable{
     }
 
 
+    public String channel(){
+        return this.channel;
+    }
     /**
      * Sends a message directly to this client.
      *
