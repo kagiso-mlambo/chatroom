@@ -74,10 +74,6 @@ class ChannelMembersRepositoryTest {
 
     @Test
     void addMemberToChannelAddsUserToMultipleChannels() {
-        // Regression test: addMemberToChannel's existence check now looks at
-        // the (channel_id, user_id) pair together, so a user who already
-        // belongs to one channel can still be correctly added to a different
-        // one, rather than being silently skipped.
         channelMembersRepository.addMemberToChannel(generalChannelId, aliceId);
 
         channelMembersRepository.addMemberToChannel(randomChannelId, aliceId);
