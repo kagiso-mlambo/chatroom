@@ -4,7 +4,7 @@ A terminal based, real time, multi client chatroom built from scratch in Java. I
 
 ## Demo
 
-*(Add your demo video link here once recorded.)*
+*https://youtu.be/cePYuFR7dqU*
 
 ## Architecture
 
