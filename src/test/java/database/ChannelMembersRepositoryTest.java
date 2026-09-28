@@ -73,17 +73,17 @@ class ChannelMembersRepositoryTest {
     }
 
     @Test
-    void addMemberToChannelSkipsAUserWhoAlreadyHasAMembershipRowElsewhere() {
-        // addMemberToChannel's existence check only looks at user_id, not
-        // the (channel_id, user_id) pair together, so a user who is
-        // already a member of *any* channel is skipped when added to a
-        // different one. This test pins down that current behaviour.
+    void addMemberToChannelAddsUserToMultipleChannels() {
+        // Regression test: addMemberToChannel's existence check now looks at
+        // the (channel_id, user_id) pair together, so a user who already
+        // belongs to one channel can still be correctly added to a different
+        // one, rather than being silently skipped.
         channelMembersRepository.addMemberToChannel(generalChannelId, aliceId);
 
         channelMembersRepository.addMemberToChannel(randomChannelId, aliceId);
 
         assertTrue(channelMembersRepository.doesMemberExistInChannel(aliceId, generalChannelId));
-        assertFalse(channelMembersRepository.doesMemberExistInChannel(aliceId, randomChannelId));
+        assertTrue(channelMembersRepository.doesMemberExistInChannel(aliceId, randomChannelId));
     }
 
     @Test
